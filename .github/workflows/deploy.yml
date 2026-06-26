@@ -30,9 +30,19 @@ jobs:
       - name: Build the book
         run: jupyter-book build . --warningiserror
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Password-protect the built site
+        working-directory: _build
+        env:
+          STATICRYPT_PASSWORD: ${{ secrets.STATICRYPT_PASSWORD }}
+        run: npx --yes staticrypt html -r -d encrypted --short --remember 7 -c ../.staticrypt.json
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: _build/html
+          path: _build/encrypted/html
 
   deploy:
     needs: build
