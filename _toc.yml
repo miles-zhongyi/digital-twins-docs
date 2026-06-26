@@ -1,0 +1,15 @@
+format: jb-book
+root: intro
+chapters:
+  - file: poc_stresstest/overview
+    sections:
+      - file: poc_stresstest/architecture
+      - file: poc_stresstest/design_principles
+      - file: poc_stresstest/usage_and_roadmap
+  - file: srstwin/overview
+    sections:
+      - file: srstwin/lte_digital_twin
+      - file: srstwin/sa_signaling_storm
+      - file: srstwin/design_principles
+      - file: srstwin/usage_and_roadmap
+  - file: comparison

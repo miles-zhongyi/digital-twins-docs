@@ -1,0 +1,18 @@
+title: Digital Twins Project Documentation
+author: DodonaData
+logo: ""
+
+execute:
+  execute_notebooks: "off"
+
+html:
+  use_issues_button: true
+  use_repository_button: true
+
+repository:
+  url: https://github.com/miles-zhongyi/digital-twins-docs
+  branch: main
+
+sphinx:
+  config:
+    html_theme: sphinx_book_theme
