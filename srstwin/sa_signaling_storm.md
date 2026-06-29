@@ -7,10 +7,10 @@ The 5G side runs a real standalone 5G core (**Open5GS**) and a real gNB
 `integration/Dockerfile.gnb`, which builds srsRAN-Project's `gnb` target).
 `ocudu/` is a full srsRAN-Project source clone. The `gnb` binary as built and
 run here is **one monolithic process** combining <span class="glossary-term" data-glossary-id="cu" data-glossary-term="CU" data-glossary-definition="Centralized Unit — higher layers (PDCP/RRC) in a split base station, less time-critical than the DU. Connects to DU over F1." tabindex="0" role="button">CU</span>-CP, CU-UP, and <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> — the
-F1 (CU↔DU) and E1 (<span class="glossary-term" data-glossary-id="cu" data-glossary-term="CU" data-glossary-definition="Centralized Unit — higher layers (PDCP/RRC) in a split base station, less time-critical than the DU. Connects to DU over F1." tabindex="0" role="button">CU</span>-CP↔CU-UP) interfaces exist in the source (srsRAN-Project
+F1 (CU↔DU) and E1 (CU-CP↔CU-UP) interfaces exist in the source (srsRAN-Project
 supports running them as separate processes over real sockets) but today
 they're wired as in-process local connectors, not exposed externally. This
-matters directly for "plugging into a real DU" later: a real <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> only speaks
+matters directly for "plugging into a real DU" later: a real DU only speaks
 <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span>/MAC/RLC + F1AP, so doing that for real means first splitting this
 monolithic `gnb` into separate CU and DU processes talking F1 over a real
 socket — structurally supported by the codebase, not yet done in this twin.
@@ -41,7 +41,7 @@ share one ZMQ lockstep, so the <span class="glossary-term" data-glossary-id="cel
 with N, not CPU-with-N. Above ~4 UEs attach latency balloons. The expensive
 per-sample channel operations (carrier-frequency-offset and <span class="glossary-term" data-glossary-id="uplink-downlink" data-glossary-term="Uplink and Downlink" data-glossary-definition="Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs." tabindex="0" role="button">downlink</span> AWGN)
 are **off by default** for exactly this reason — enabling them measurably
-cratered throughput (observed ~20× slowdown on an 8-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> pool); they're only
+cratered throughput (observed ~20× slowdown on an 8-UE pool); they're only
 re-enabled via separate `*_heavy` RF profiles, and only recommended for
 pools of 2-3.
 
@@ -49,7 +49,7 @@ pools of 2-3.
 third-party <span class="glossary-term" data-glossary-id="nas" data-glossary-term="NAS" data-glossary-definition="Non-Access Stratum — Layer 3 protocol between UE and core for attach, authentication, and session management." tabindex="0" role="button">NAS</span>/<span class="glossary-term" data-glossary-id="rrc" data-glossary-term="RRC" data-glossary-definition="Radio Resource Control — Layer 3 protocol between UE and base station for connection setup, mobility, and bearer configuration." tabindex="0" role="button">RRC</span>-over-<span class="glossary-term" data-glossary-id="ngap" data-glossary-term="NGAP" data-glossary-definition="NG Application Protocol — control-plane protocol between gNB and 5G core AMF." tabindex="0" role="button">NGAP</span> UE+gNB simulator with **no PHY at all** — it
 talks straight to the <span class="glossary-term" data-glossary-id="amf" data-glossary-term="AMF" data-glossary-definition="Access and Mobility Management Function — 5G core node handling registration and mobility over NGAP." tabindex="0" role="button">AMF</span> over its own <span class="glossary-term" data-glossary-id="sctp" data-glossary-term="SCTP" data-glossary-definition="Stream Control Transmission Protocol — reliable transport used by S1AP, NGAP, and other telecom control protocols." tabindex="0" role="button">SCTP</span> association, so hundreds of UEs
 cost almost nothing. The AMF therefore sees **two distinct gNB endpoints**
-for one storm: OCUDU (Layer A, real F1/<span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span> underneath) and UERANSIM's `nr-gnb`
+for one storm: OCUDU (Layer A, real F1/PHY underneath) and UERANSIM's `nr-gnb`
 (Layer B), both provisioning subscribers from the same
 `subscribers.storm.csv`. This is the scale knob for pure core-network
 control-plane load, deliberately decoupled from anything PHY.
@@ -96,10 +96,10 @@ the exact requested mix is hit). The profiles set uplink gain, downlink
 SNR, fading type (Rician near/mid, Rayleigh at the edge), Doppler, CFO, and
 propagation delay (in ZMQ samples — at the testbed's 11.52 Msps, one sample
 ≈ 26 m, so a 4-sample delay models roughly a 100 m cell-edge UE). The
-*spread* in <span class="glossary-term" data-glossary-id="uplink-downlink" data-glossary-term="Uplink and Downlink" data-glossary-definition="Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs." tabindex="0" role="button">uplink</span> gain (1.0 near → 0.55 mid → 0.30 edge) is what actually
+*spread* in uplink gain (1.0 near → 0.55 mid → 0.30 edge) is what actually
 drives the PRACH near-far capture effect at the hub — not anything in the
 gNB or UE. `ideal` is the identity profile and matches the originally
-verified 1-UE/2-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> baseline exactly, by design (see `design_principles.md`).
+verified 1-UE/2-UE baseline exactly, by design (see `design_principles.md`).
 
 ### Measuring it (`storm/metrics.py`)
 
@@ -131,9 +131,9 @@ capture the way it would over real air. Two mechanics worth knowing:
   late arrivals don't have to be pre-known. A slot is freed only after
   several consecutive uplink round-trip misses (default: 8), not
   immediately on container exit, and a slow/stalled UE is **never** dropped
-  on a <span class="glossary-term" data-glossary-id="uplink-downlink" data-glossary-term="Uplink and Downlink" data-glossary-definition="Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs." tabindex="0" role="button">downlink</span> timeout, only on sustained uplink failure — because
+  on a downlink timeout, only on sustained uplink failure — because
   abandoning a request mid-flight would desync that UE's own RF thread and
-  freeze the whole <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>, not just that <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span>.
+  freeze the whole cell, not just that UE.
 
 ## Relationship to the 4G twin's `realizer/` plan
 
@@ -144,7 +144,7 @@ lockstep-scaling problem by hosting N logical UE contexts inside **one**
 `srsue` process over one shared PHY worker, instead of N independent
 processes. It is conceptually the mirror image of this storm framework's
 two-layer split: rather than separating "small real-PHY pool" from "large
-PHY-abstract pool" as two different layers, it asks whether the real-<span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span>
+PHY-abstract pool" as two different layers, it asks whether the real-PHY
 pool itself can be made to scale further before resorting to abstraction at
 all. The two efforts are independent (4G vs. 5G stacks, different code), but
 the same underlying constraint — one shared ZMQ lockstep clock — motivates

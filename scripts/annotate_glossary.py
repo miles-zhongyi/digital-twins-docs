@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Annotate markdown with glossary spans using per-page occurrence throttling."""
+"""Annotate markdown with glossary spans — one highlighted definition per term per page."""
 
 from __future__ import annotations
 
@@ -73,14 +73,11 @@ def strip_existing_spans(text: str) -> str:
     return GLOSSARY_SPAN_RE.sub(lambda match: match.group("text"), text)
 
 
-def should_define(term_id: str, term_state: dict[str, dict]) -> bool:
-    """Per page: define, skip 2, define, skip 4, define, skip 8, ..."""
-    state = term_state.setdefault(term_id, {"skip_remaining": 0, "next_skip": 2})
-    if state["skip_remaining"] > 0:
-        state["skip_remaining"] -= 1
+def should_define(term_id: str, defined: set[str]) -> bool:
+    """Per page: highlight the first occurrence of each term only."""
+    if term_id in defined:
         return False
-    state["skip_remaining"] = state["next_skip"]
-    state["next_skip"] *= 2
+    defined.add(term_id)
     return True
 
 
@@ -106,7 +103,7 @@ def find_earliest_match(segment: str, cursor: int, patterns: list[dict]) -> dict
 
 
 def annotate_segment_with_state(
-    segment: str, patterns: list[dict], term_state: dict[str, dict]
+    segment: str, patterns: list[dict], defined: set[str]
 ) -> str:
     if not segment:
         return segment
@@ -122,7 +119,7 @@ def annotate_segment_with_state(
 
         parts.append(segment[cursor : match["start"]])
         term_id = match["pattern"]["id"]
-        if should_define(term_id, term_state):
+        if should_define(term_id, defined):
             parts.append(make_span(match["text"], match["pattern"]))
         else:
             parts.append(match["text"])
@@ -144,23 +141,23 @@ def split_inline_markdown(line: str) -> list[tuple[str, bool]]:
     return parts
 
 
-def annotate_line(line: str, patterns: list[dict], term_state: dict[str, dict]) -> str:
+def annotate_line(line: str, patterns: list[dict], defined: set[str]) -> str:
     line = strip_existing_spans(line)
     pieces: list[str] = []
     for segment, protected in split_inline_markdown(line):
         if protected:
             pieces.append(segment)
         else:
-            pieces.append(annotate_segment_with_state(segment, patterns, term_state))
+            pieces.append(annotate_segment_with_state(segment, patterns, defined))
     return "".join(pieces)
 
 
 def annotate_markdown(text: str, patterns: list[dict]) -> str:
-    """One throttle counter per page (whole markdown file)."""
+    """One highlight per glossary term for the whole markdown file."""
     lines = text.splitlines(keepends=True)
     output: list[str] = []
     in_fence = False
-    term_state: dict[str, dict] = {}
+    defined: set[str] = set()
 
     for line in lines:
         fence_match = FENCE_RE.match(line)
@@ -173,7 +170,7 @@ def annotate_markdown(text: str, patterns: list[dict]) -> str:
             output.append(strip_existing_spans(line))
             continue
 
-        output.append(annotate_line(line, patterns, term_state))
+        output.append(annotate_line(line, patterns, defined))
 
     return "".join(output)
 

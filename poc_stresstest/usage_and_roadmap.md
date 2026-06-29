@@ -96,7 +96,7 @@ in `common/rf_model.py`'s `prbs_for_traffic()`:
 - `voip` (default) — fixed 1–2 PRBs per session, independent of `demand_mbps`
   (`prbs_for_voip()`); good RF gets 1 PRB, marginal RF (`sinr_dl_db < 5.0`) gets 2,
   capped at `VOIP_MAX_PRBS`.
-- `data` — <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRBs</span> sized from `demand_mbps` via `prbs_for_demand()`, uncapped, for
+- `data` — PRBs sized from `demand_mbps` via `prbs_for_demand()`, uncapped, for
   pure capacity stress.
 
 Switching to broadband load requires setting `TRAFFIC_PROFILE=data` and matching
@@ -107,7 +107,7 @@ demand value, so they must agree.
 ### Running without Docker
 
 `./scripts/run_local.sh [num_ues]` (Linux/macOS/Git Bash) starts one DU, **one**
-<span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span> at the origin, and the <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> simulator directly with `python3`, setting
+<span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span> at the origin, and the UE simulator directly with `python3`, setting
 `PYTHONPATH` and raising the file-descriptor `ulimit`. This path does not stand up
 the 3-RU cluster or the dashboard — it is a single-RU smoke-test path, not an
 alternative to Compose for cluster-scale runs.
@@ -117,7 +117,7 @@ alternative to Compose for cluster-scale runs.
 These are grounded in specific stubs, constants, or comments found in the code —
 not aspirational roadmap items.
 
-- **No 5G NR signalling, despite the project's "5G <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span> Digital Twin" name.**
+- **No 5G NR signalling, despite the project's "5G RU Digital Twin" name.**
   `common/signaling/nr.py`'s `NrCatalog.__init__` unconditionally raises
   `NotImplementedError("5G NR signalling catalog is not implemented yet. Set
   RADIO_TECH=lte (default) to use the 4G LTE flow.")`. The only implemented
@@ -149,7 +149,7 @@ not aspirational roadmap items.
   (`273`) in `du_server.py`.** Both values are plausible (273 matches LTE's 20 MHz
   carrier; 250 is the value the RU side and the README/CLAUDE.md cluster
   description assume), but the two should arguably be reconciled or the
-  discrepancy documented in-code, since running the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> outside Compose with no
+  discrepancy documented in-code, since running the DU outside Compose with no
   environment override silently changes per-<span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span> capacity.
 - **No automated test execution path documented for CI; tests exist but are
   run manually.** `tests/` has real pytest coverage (`test_signaling_flow.py`,
@@ -163,7 +163,7 @@ not aspirational roadmap items.
   exercise inter-site handover (only the in-Docker 3-site cluster can); anyone
   testing handover behavior locally without containers would need to hand-extend
   that script.
-- **The dashboard's single-UE call-flow ladder tracks exactly one <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> at a time**
+- **The dashboard's single-UE call-flow ladder tracks exactly one UE at a time**
   by design (`DU.trace_ue`/`trace_events` in `du_server.py` is a single slot, not
   a per-UE map), reset via `GET /trace/reset`. This is adequate for inspecting one
   representative call flow but cannot show concurrent multi-UE message

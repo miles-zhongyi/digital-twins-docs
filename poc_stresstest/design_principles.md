@@ -14,8 +14,8 @@ a dedicated radio link per device, and treating it that way means a handover is
 just "open a new socket, close the old one" with no extra state-migration
 machinery (`ue_sim.py`'s `one_session()` does exactly this, make-before-break).
 RU↔<span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> (`F1Link` in `ru_server.py`) is one multiplexed socket per RU, correlated by
-a `txn` id, because that is what the real F1 interface is: one DU↔<span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span> association
-carrying every <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> that tower serves. The payoff is concrete and measurable — DU
+a `txn` id, because that is what the real F1 interface is: one DU↔RU association
+carrying every UE that tower serves. The payoff is concrete and measurable — DU
 connection count is O(number of towers), not O(number of phones), which is the
 entire reason a 3-RU cluster can credibly carry thousands of simulated UEs in one
 process on a laptop. If a future hop needs different multiplexing in the real
@@ -31,7 +31,7 @@ record, and simulation bookkeeping (`ue_id`, `cell`, `rf`, `demand_mbps`,
 `common/signaling/catalog.py` puts the second kind under a single reserved key,
 `_twin`, instead of letting it leak into top-level fields. The motivating risk is
 collision and confusion: the realistic envelope already has a cosmetic numeric
-`cell_id` (derived in `cell_num()` purely for display, e.g. `cell-1 → 1`); the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span>'s
+`cell_id` (derived in `cell_num()` purely for display, e.g. `cell-1 → 1`); the DU's
 *functional* serving-<span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span> key (`tw["cell"]`, a string like `"RU1-A"`, the actual
 <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRB</span>-pool lookup key) is a different thing with a similar name. Keeping it in
 `_twin` rather than reusing or renaming the envelope's `cell_id` means the two
@@ -76,7 +76,7 @@ received `message_name` straight back to its `Step`). Neither side needs to trac
 "what state is this UE's RRC connection in" as an explicit state machine — the UE
 already knows because it's iterating `CATALOG.attach_flow()` in order, and the DU
 derives the right handler purely from which message arrived, not from any stored
-per-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> protocol state. This keeps the procedure model symmetric with the transport
+per-UE protocol state. This keeps the procedure model symmetric with the transport
 model: both are fundamentally request/reply, just composed into a sequence.
 
 ## Admission accounting must be done exactly once, even when two attempts overlap
@@ -109,8 +109,8 @@ straight-line `await` chain with no buffering logic to get wrong.
 
 ## Let each side compute its own copy of shared physics rather than transmitting a derived decision
 
-The UE does not ask the RU "which <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span> should I be on" — it calls the same
-`rf.link_rf()` function the <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span>'s `compute_rf()` calls, with the same tx power,
+The UE does not ask the RU "which cell should I be on" — it calls the same
+`rf.link_rf()` function the RU's `compute_rf()` calls, with the same tx power,
 frequency, gain, and sector-width parameters (`rsrp_from()` in `ue_sim.py` mirrors
 `compute_rf()` in `ru_server.py` field-for-field), and makes its own handover
 decision from that. The RU then independently recomputes RF for whatever cell the

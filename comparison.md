@@ -53,7 +53,7 @@ to different stages of the same testing question:
 
 Neither project needs to grow into doing the other's job. Where srsTwin's
 real stacks hit a structural scaling wall (one shared radio-link lockstep
-clock, slowing roughly linearly with <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> count — see
+clock, slowing roughly linearly with UE count — see
 [`srstwin/design_principles.md`](srstwin/design_principles.md) §3), the
 answer in both projects has consistently been to add a separate, explicitly
 lower-fidelity layer for the concern that needs scale, rather than to
@@ -64,7 +64,7 @@ weaken the fidelity of the layer that's there to be trusted.
 srsTwin's 3-UE demo (see
 [`srstwin/lte_digital_twin.md`](srstwin/lte_digital_twin.md)) measured,
 rather than estimated, what running 3 real protocol stacks concurrently on
-one host costs relative to one running alone: **<span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> processing delay rose
+one host costs relative to one running alone: **DU processing delay rose
 28.40 ms → 30.86 ms (+8.7%), call duration rose 35.41 s → 38.45 s (+8.6%)**
 (n=5 cycles per scenario). That's real host-contention cost between
 independent, fully real stacks — exactly the kind of number that motivates

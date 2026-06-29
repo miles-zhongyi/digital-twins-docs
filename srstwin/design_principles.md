@@ -35,7 +35,7 @@ check, not a thing you remember to eyeball.
 ## 3. When a real protocol stack hits a structural scaling wall, don't approximate the stack — separate the concern that needs scale from the concern that needs fidelity
 
 Both stacks hit the same wall (one shared ZMQ lockstep clock, slowing
-roughly linearly with <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> count, not CPU-bound) and both refused to fix it
+roughly linearly with UE count, not CPU-bound) and both refused to fix it
 by making the real stack "a little less real." The 5G twin keeps a small
 real-<span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span> pool for protocol validation and adds a *completely separate*
 PHY-abstract layer (UERANSIM) purely for the concern that actually needs

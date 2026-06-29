@@ -27,7 +27,7 @@ questions:
 Both twins are validated against the **same real-world data source**: decoded
 LTE call traces from a real TELUS network (`22_decoded/`, shared with
 `poc_StressTest`). The 4G twin injects a real captured subscriber's identity
-into a live simulated <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span>'s first RRC message, so the resulting signaling is
+into a live simulated UE's first RRC message, so the resulting signaling is
 byte-comparable to what a real phone produced on a real network. See
 [`../comparison.md`](../comparison.md) for how this and `poc_StressTest`'s
 trace-timing replay relate.
@@ -47,7 +47,7 @@ state the same pool "stays PHY-correct, but above ~4 UEs the clock crawls."
 Rather than fight that limit, both twins **accept it and scale around it**:
 the 4G twin keeps the real stack small (1-3 pairs) and treats contention
 itself as the thing being measured; the 5G twin keeps a small real-PHY pool
-for protocol validation (Layer A) and adds a <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span>-abstract layer (Layer B,
+for protocol validation (Layer A) and adds a PHY-abstract layer (Layer B,
 UERANSIM) purely for core-network signaling scale. See
 [`design_principles.md`](design_principles.md) for the general principle
 this reflects: when a real protocol stack hits a structural scaling wall,

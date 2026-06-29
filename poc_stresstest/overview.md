@@ -17,16 +17,16 @@ admission control that mirrors how a real DU would grant or reject a session.
 ## Why it exists
 
 The originating brief (see `Proposal.txt`) asked for a way to validate a 5G RU's
-behaviour against a <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span>/<span class="glossary-term" data-glossary-id="cu" data-glossary-term="CU" data-glossary-definition="Centralized Unit — higher layers (PDCP/RRC) in a split base station, less time-critical than the DU. Connects to DU over F1." tabindex="0" role="button">CU</span> under realistic traffic without field trials: reproduce
+behaviour against a DU/<span class="glossary-term" data-glossary-id="cu" data-glossary-term="CU" data-glossary-definition="Centralized Unit — higher layers (PDCP/RRC) in a split base station, less time-critical than the DU. Connects to DU over F1." tabindex="0" role="button">CU</span> under realistic traffic without field trials: reproduce
 mobility, handovers, and capacity load for a cluster using historical call-trace
 data, without needing live spectrum or production hardware access. The proof of
-concept narrows that to the simplest useful slice: create one DU and an <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span> cluster
+concept narrows that to the simplest useful slice: create one DU and an RU cluster
 in containers, simulate UEs establishing sessions, consuming PRBs, moving, and
 releasing, and make the UE count scale into the thousands so the DU's admission
-control and <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRB</span> pools are pushed under genuine load.
+control and PRB pools are pushed under genuine load.
 
 Running this in Docker on a laptop only works because of one architecture
-decision: the <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> population is simulated as asyncio tasks inside a single process,
+decision: the UE population is simulated as asyncio tasks inside a single process,
 not as one container per UE (Docker cannot sustain thousands of containers'
 namespaces and per-container bookkeeping). See `architecture.md` for why the
 connection topology on top of that is what actually makes it scale.
@@ -57,7 +57,7 @@ DU (one container, owns all PRB pools)
   transmit power, and traffic demand. Each UE picks the strongest RU/sector for its
   position, attaches, exchanges measurement reports and data, hands over between
   sectors and sites as it moves, and eventually releases.
-- **Dashboard** (`dashboard/server.py`, port 9090) — polls the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> and <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> simulator
+- **Dashboard** (`dashboard/server.py`, port 9090) — polls the DU and UE simulator
   `/status` endpoints once a second and renders PRB utilization bars, a UE-count
   slider, handover stats, a live mobility map, and a single-UE call-flow ladder
   (RRC/S1AP sequence diagram) sourced from the DU's message trace ring buffer.

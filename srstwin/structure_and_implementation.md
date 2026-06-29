@@ -61,7 +61,7 @@ srsENB → S1AP (SCTP) → srsEPC
 
 ### PER bytes to <span class="glossary-term" data-glossary-id="zmq-iq" data-glossary-term="ZMQ IQ" data-glossary-definition="Simulated radio link over network sockets where radio signals are represented as IQ samples with in-phase (I) and quadrature (Q) components." tabindex="0" role="button">ZMQ IQ samples</span>
 
-1. **<span class="glossary-term" data-glossary-id="asn1" data-glossary-term="ASN.1" data-glossary-definition="A schema language for telecom messages: a strict protocol blueprint defining what messages exist, their fields, mandatory vs optional fields, choices, and value types." tabindex="0" role="button">ASN.1</span> → <span class="glossary-term" data-glossary-id="per-encoding" data-glossary-term="PER encoding" data-glossary-definition="Packed Encoding Rules — compact binary encoding of ASN.1 structures for RRC/NAS Layer-3 messages. Decoupling from PHY does not mean skipping PER encoding." tabindex="0" role="button">PER</span>** — srsRAN holds C++ ASN.1 structures and packs them to PER
+1. **<span class="glossary-term" data-glossary-id="asn1" data-glossary-term="ASN.1" data-glossary-definition="A schema language for telecom messages: a strict protocol blueprint defining what messages exist, their fields, mandatory vs optional fields, choices, and value types." tabindex="0" role="button">ASN.1</span> → PER** — srsRAN holds C++ ASN.1 structures and packs them to PER
    (`asn1::bit_ref`, `msg.pack()`), producing a byte blob (logged as hex).
 2. **PDCP** — wraps <span class="glossary-term" data-glossary-id="rrc" data-glossary-term="RRC" data-glossary-definition="Radio Resource Control — Layer 3 protocol between UE and base station for connection setup, mobility, and bearer configuration." tabindex="0" role="button">RRC</span> bytes for the radio bearer. SRB0 during early attach is
    often a transparent pipe; SRB1 adds sequence numbers, integrity, and
@@ -113,7 +113,7 @@ safe defaults:
 
 ### PER encoding (summary)
 
-PER (<span class="glossary-term" data-glossary-id="per-encoding" data-glossary-term="PER encoding" data-glossary-definition="Packed Encoding Rules — compact binary encoding of ASN.1 structures for RRC/NAS Layer-3 messages. Decoupling from PHY does not mean skipping PER encoding." tabindex="0" role="button">Packed Encoding Rules</span>) converts <span class="glossary-term" data-glossary-id="asn1" data-glossary-term="ASN.1" data-glossary-definition="A schema language for telecom messages: a strict protocol blueprint defining what messages exist, their fields, mandatory vs optional fields, choices, and value types." tabindex="0" role="button">ASN.1</span> to compact binary: choice indices,
+PER (Packed Encoding Rules) converts ASN.1 to compact binary: choice indices,
 optional-field bitmaps, constrained integers, enums, and length-prefixed
 strings — output as hex for inspection.
 
@@ -157,6 +157,6 @@ SDR hardware.
 
 ## Related reading
 
-- [LTE Digital Twin](lte_digital_twin.md) — trace injection, 3-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> demo, dashboard
+- [LTE Digital Twin](lte_digital_twin.md) — trace injection, 3-UE demo, dashboard
 - [Design principles](design_principles.md) — fidelity vs scale trade-offs
 - [Glossary](../glossary.md) — definitions for highlighted terms

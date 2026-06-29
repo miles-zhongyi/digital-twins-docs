@@ -27,7 +27,7 @@ together.
 Dashboard: `python integration/dashboard/serve_dashboard.py --pull`, then
 open `http://localhost:8765`. The 4G LTE tab shows a live signaling ladder,
 per-message decode/explanation, attach/session KPIs, and (bottom-left) a
-multi-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> KPI histogram. For a fuller-looking histogram, run
+multi-UE KPI histogram. For a fuller-looking histogram, run
 `integration/demo3ue/live_cycler.py --pairs 1,2,3` for a few minutes
 beforehand — it continuously recreates each pair's containers to generate
 fresh samples, so don't run it if you need the stack to stay up undisturbed
@@ -65,7 +65,7 @@ after enabling it).
   supports running them as separate processes over real sockets; this
   twin doesn't do that yet. This is the actual blocker for "plug into a
   real external DU" — see the storm chapter's framing of why PHY-abstract
-  UEs structurally cannot reach a real <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> (a DU has no notion of <span class="glossary-term" data-glossary-id="rrc" data-glossary-term="RRC" data-glossary-definition="Radio Resource Control — Layer 3 protocol between UE and base station for connection setup, mobility, and bearer configuration." tabindex="0" role="button">RRC</span>/<span class="glossary-term" data-glossary-id="nas" data-glossary-term="NAS" data-glossary-definition="Non-Access Stratum — Layer 3 protocol between UE and core for attach, authentication, and session management." tabindex="0" role="button">NAS</span>).
+  UEs structurally cannot reach a real DU (a DU has no notion of <span class="glossary-term" data-glossary-id="rrc" data-glossary-term="RRC" data-glossary-definition="Radio Resource Control — Layer 3 protocol between UE and base station for connection setup, mobility, and bearer configuration." tabindex="0" role="button">RRC</span>/<span class="glossary-term" data-glossary-id="nas" data-glossary-term="NAS" data-glossary-definition="Non-Access Stratum — Layer 3 protocol between UE and core for attach, authentication, and session management." tabindex="0" role="button">NAS</span>).
 
 ## Roadmap: `realizer/` — N logical UEs in one `srsue` process (4G, paused)
 
@@ -84,10 +84,10 @@ Status: **M0 complete, M1 not started, srsue's actual source untouched.**
 | Milestone | Scope | Status |
 |---|---|---|
 | M0 | Interfaces (`interfaces.py`), per-UE subscriber generator (`gen_user_db.py`), N=1 regression baseline + diff tool (`capture_n1_baseline.py` / `check_n1_baseline.py`) | Done |
-| M1 | 2 logical UEs over 1 shared <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span> worker; dispatch + grid-placement code; full attach→bearer→detach against unmodified srsenb/<span class="glossary-term" data-glossary-id="srsepc" data-glossary-term="srsEPC" data-glossary-definition="srsRAN's simplified 4G core containing MME, SGW, PGW, and HSS. Authenticates srsUE and assigns an IP address." tabindex="0" role="button">srsepc</span>; N=1 baseline diff must stay clean | Not started |
+| M1 | 2 logical UEs over 1 shared PHY worker; dispatch + grid-placement code; full attach→bearer→detach against unmodified srsenb/<span class="glossary-term" data-glossary-id="srsepc" data-glossary-term="srsEPC" data-glossary-definition="srsRAN's simplified 4G core containing MME, SGW, PGW, and HSS. Authenticates srsUE and assigns an IP address." tabindex="0" role="button">srsepc</span>; N=1 baseline diff must stay clean | Not started |
 | M2 | Parameterize to N=8; collect PDCCH miss rate, per-TTI worker time, <span class="glossary-term" data-glossary-id="harq" data-glossary-term="HARQ" data-glossary-definition="Hybrid Automatic Repeat Request — L1/L2 retransmission mechanism whose timing RRC procedures depend on." tabindex="0" role="button">HARQ</span> memory | Not started |
 | M3 | Unit-test grant routing correctness; verify only modeled PRACH collisions occur, not dispatch bugs | Not started |
-| M4 | Load harness: per-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> attach success/timing distributions, extending the dashboard's `parse_4g.py` KPI logic | Not started |
+| M4 | Load harness: per-UE attach success/timing distributions, extending the dashboard's `parse_4g.py` KPI logic | Not started |
 | M5 | Live <span class="glossary-term" data-glossary-id="pycrate" data-glossary-term="Pycrate" data-glossary-definition="Python ASN.1 toolkit used to load UL-DCCH-Message definitions and validate that reconstructed messages match the expected ASN.1 structure and fields." tabindex="0" role="button">pycrate</span> byte-injection — populate real UEs' transmitted bytes from real trace records at runtime (the missing other half of trace-identity injection, today offline-only) | Deferred until M1-M4 are solid |
 
 Each milestone in `PLAN.md` is paired with a specific risk (grant
@@ -102,10 +102,10 @@ credential collisions) and a concrete mitigation — see
   more tightly with Layer A's, to study mixed real-PHY/abstract surges more
   precisely.
 - If a real external DU becomes a target, the prerequisite is splitting
-  `ocudu`'s `gnb` into separate <span class="glossary-term" data-glossary-id="cu" data-glossary-term="CU" data-glossary-definition="Centralized Unit — higher layers (PDCP/RRC) in a split base station, less time-critical than the DU. Connects to DU over F1." tabindex="0" role="button">CU</span> and DU processes communicating over a
+  `ocudu`'s `gnb` into separate CU and DU processes communicating over a
   real F1 socket (supported by the source, not configured here) — at that
   point Layer A's real-PHY pool would sit in front of a DU that's either
-  still OCUDU's own or an actual third-party <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span>, with the rest of the
+  still OCUDU's own or an actual third-party DU, with the rest of the
   pipeline unchanged.
 - `*_heavy` RF profiles (CFO + downlink AWGN) are currently only viable on
   very small pools (2-3 UEs) before the per-sample cost craters lockstep

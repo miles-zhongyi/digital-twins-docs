@@ -26,7 +26,7 @@ independent ZMQ lockstep links, each as fast as a single UE alone.
 
 ## Trace identity injection
 
-The twin's distinguishing feature is that a live simulated <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> can carry a
+The twin's distinguishing feature is that a live simulated UE can carry a
 **real captured subscriber's identity**. `rrc_trace_fields.py` extracts the
 `m_tmsi` and `establishmentCause` fields from a real decoded TELUS call
 record (`22_decoded/`), and
@@ -65,14 +65,14 @@ individually as fast as 1 pair alone — what changes is that they now
 compete for the *same host's* CPU, which is a different, also-real and
 also-worth-measuring kind of contention. The paused `realizer/` plan
 (see `usage_and_roadmap.md`) is the alternative being designed for: one
-`srsue` process hosting N logical <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> contexts over one shared PHY worker,
+`srsue` process hosting N logical UE contexts over one shared PHY worker,
 which would remove the per-pair container/process overhead entirely — but
 that is **not** what's running today.
 
 ## Measuring real contention: the 3-UE demo
 
 `integration/demo3ue/` force-recreates each pair's eNB+UE together (recreating
-a UE alone against an already-running <span class="glossary-term" data-glossary-id="enb" data-glossary-term="eNB" data-glossary-definition="Evolved Node B — the 4G LTE base station connecting UEs to the EPC over S1AP." tabindex="0" role="button">eNB</span> causes a <span class="glossary-term" data-glossary-id="rach" data-glossary-term="RACH" data-glossary-definition="Random Access Channel — procedure for a UE to request initial access to a cell (preamble, response, connection setup)." tabindex="0" role="button">RACH</span> retry storm that
+a UE alone against an already-running eNB causes a <span class="glossary-term" data-glossary-id="rach" data-glossary-term="RACH" data-glossary-definition="Random Access Channel — procedure for a UE to request initial access to a cell (preamble, response, connection setup)." tabindex="0" role="button">RACH</span> retry storm that
 never settles — confirmed empirically) and runs repeated attach/release
 cycles, comparing one pair running alone against all three running
 concurrently. Two KPIs are tracked:
@@ -89,7 +89,7 @@ hardware, only concurrency changed):
 
 | | 1 pair alone | 3 pairs concurrent | |
 |---|---|---|---|
-| <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> processing delay | 28.40 ms | 30.86 ms | **+8.7%** |
+| DU processing delay | 28.40 ms | 30.86 ms | **+8.7%** |
 | Call duration | 35.41 s | 38.45 s | **+8.6%** |
 
 That's host-CPU contention between three independent stacks, not protocol
@@ -107,8 +107,8 @@ multi-UE KPI histogram. A few points worth knowing if you're extending it:
   Two non-obvious pieces: an `_ATTACH_FLOW` phase-rank table sorts events by
   *protocol logic* (cell acquisition → random access → setup → NAS auth →
   bearer setup → attach complete → release) rather than raw timestamp,
-  because <span class="glossary-term" data-glossary-id="nas" data-glossary-term="NAS" data-glossary-definition="Non-Access Stratum — Layer 3 protocol between UE and core for attach, authentication, and session management." tabindex="0" role="button">NAS</span> Attach Request is logged by `srsue` at decision-time, before
-  it's actually sent inside a later <span class="glossary-term" data-glossary-id="rrc" data-glossary-term="RRC" data-glossary-definition="Radio Resource Control — Layer 3 protocol between UE and base station for connection setup, mobility, and bearer configuration." tabindex="0" role="button">RRC</span> message — `_CARRIED_IN` substitutes
+  because NAS Attach Request is logged by `srsue` at decision-time, before
+  it's actually sent inside a later RRC message — `_CARRIED_IN` substitutes
   the carrier message's timestamp so the ladder doesn't show it arriving
   "before" its own logical predecessor. `compute_attach_kpis()` separates
   attach-phase events from release-phase events specifically so a long idle
@@ -116,7 +116,7 @@ multi-UE KPI histogram. A few points worth knowing if you're extending it:
 - **Live polling is debounced, not per-request.** Each browser poll
   (`/api/data`, every 5s) calls `pull_logs_4g()` (six `docker exec ... tail`
   calls, one per container, run in parallel) then a full re-parse. Two
-  failure modes were found and fixed the hard way: (1) srsue's <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span> layer
+  failure modes were found and fixed the hard way: (1) srsue's PHY layer
   logs every subframe, so an unbounded `docker cp` of the whole log file
   eventually means parsing millions of lines per poll — fixed by tailing a
   bounded window instead of copying the whole file; (2) with several browser
