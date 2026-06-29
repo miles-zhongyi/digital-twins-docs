@@ -17,6 +17,7 @@ When you modify book content, config, assets, StatiCrypt template, or deploy wor
 3. **Deploy** by pushing to `main`:
    ```powershell
    cd D:\DodonaData\Documentation\TwinsDocumentation
+   python scripts/annotate_glossary.py
    gh auth setup-git
    git add <changed-files>
    git commit -m "<message>"

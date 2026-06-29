@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Annotate glossary terms in markdown
+        run: python scripts/annotate_glossary.py
+
       - name: Build the book
         run: jupyter-book build . --warningiserror
 

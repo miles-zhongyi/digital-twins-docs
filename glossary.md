@@ -1,8 +1,8 @@
 # Glossary
 
-Telecom and project terms used across this book. Throughout the documentation,
-these concepts are **highlighted in blue** — hover or click a highlighted term
-for a quick definition. This page lists the full definitions.
+Telecom and project terms used across this book. Marked terms in the
+documentation pages appear in **blue** — hover or click them for a quick
+definition. This page lists the full definitions.
 
 ```{raw} html
 <div class="glossary-index">

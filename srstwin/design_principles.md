@@ -5,10 +5,10 @@ are worth carrying into future work on either one.
 
 ## 1. Inject realism surgically; don't rebuild the stack to get it
 
-The 4G twin's trace-identity injection doesn't reimplement RRC message
+The 4G twin's trace-identity injection doesn't reimplement <span class="glossary-term" data-glossary-id="rrc" data-glossary-term="RRC" data-glossary-definition="Radio Resource Control — Layer 3 protocol between UE and base station for connection setup, mobility, and bearer configuration." tabindex="0" role="button">RRC</span> message
 construction to insert real subscriber data — it exports two environment
 variables (`RRC_TRACE_LTE_M_TMSI`, `RRC_TRACE_LTE_CAUSE`) that `srsue`'s
-existing RRC Connection Request builder reads via a single `std::getenv()`
+existing <span class="glossary-term" data-glossary-id="rrc" data-glossary-term="RRC" data-glossary-definition="Radio Resource Control — Layer 3 protocol between UE and base station for connection setup, mobility, and bearer configuration." tabindex="0" role="button">RRC</span> Connection Request builder reads via a single `std::getenv()`
 call, falling back to its own synthetic defaults if they're unset. The
 smallest change that makes the live signaling traceable to a real captured
 subscriber is the right one — it leaves the rest of a large, real,
@@ -21,9 +21,9 @@ surgically.
 Two unrelated parts of this project independently arrived at the same
 mechanism. The 5G hub treats an all-default RF channel as the *identity*
 operation and skips registering it entirely — so an `ideal`-profile storm
-produces bit-identical IQ to the originally verified 1-UE/2-UE link, by
+produces bit-identical IQ to the originally verified 1-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span>/2-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> link, by
 construction, not by care. The paused 4G `realizer/` plan does the same
-thing at the architecture-decision level: before any multi-UE code lands,
+thing at the architecture-decision level: before any multi-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> code lands,
 it captures the current N=1 attach sequence as a frozen baseline
 (`baselines/n1_attach_baseline.json`) and ships a diff tool
 (`check_n1_baseline.py`) that's meant to gate every subsequent milestone —
@@ -35,11 +35,11 @@ check, not a thing you remember to eyeball.
 ## 3. When a real protocol stack hits a structural scaling wall, don't approximate the stack — separate the concern that needs scale from the concern that needs fidelity
 
 Both stacks hit the same wall (one shared ZMQ lockstep clock, slowing
-roughly linearly with UE count, not CPU-bound) and both refused to fix it
+roughly linearly with <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> count, not CPU-bound) and both refused to fix it
 by making the real stack "a little less real." The 5G twin keeps a small
-real-PHY pool for protocol validation and adds a *completely separate*
-PHY-abstract layer (UERANSIM) purely for the concern that actually needs
-scale — core-network signaling load. The 4G twin's measured 3-UE
+real-<span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span> pool for protocol validation and adds a *completely separate*
+<span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span>-abstract layer (UERANSIM) purely for the concern that actually needs
+scale — core-network signaling load. The 4G twin's measured 3-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span>
 contention numbers exist *because* it chose to keep three pairs fully real
 rather than fake the third one. If you find yourself tempted to strip
 fidelity out of a real stack to make it scale, that's usually a sign the
@@ -86,12 +86,12 @@ quantity rather than noise.
 ## 7. Before an invasive low-level change, write the risk register before the code
 
 The `realizer/` plan's `PLAN.md` lists concrete, specific risks for hosting
-N UE contexts on one shared PHY worker — grant misrouting between UEs
-sharing one dispatch layer, per-UE RA timers colliding, PDCCH blind-search
+N <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> contexts on one shared <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span> worker — grant misrouting between UEs
+sharing one dispatch layer, per-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> RA timers colliding, PDCCH blind-search
 budget degrading silently at higher N, the per-TTI real-time deadline being
-missed and desyncing the whole cell, HARQ soft-buffer memory scaling with
+missed and desyncing the whole <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>, HARQ soft-buffer memory scaling with
 N — each paired with a specific mitigation (a unit test, a metric to track
 from a specific milestone, a hard gate). None of this required writing any
-of the actual multi-UE code first. For changes this close to a hard
+of the actual multi-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> code first. For changes this close to a hard
 real-time boundary, the design discipline that matters most is naming the
 specific ways it can fail before deciding how to build it, not after.
