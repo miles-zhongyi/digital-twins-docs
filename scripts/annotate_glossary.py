@@ -183,8 +183,8 @@ def main() -> int:
     md_files = sorted(
         path
         for path in root.rglob("*.md")
-        if path.name != "glossary.md" and "_build" not in path.parts
-        and path.name != "confidentiality.md"
+        if "_build" not in path.parts
+        and path.name.lower() not in {"glossary.md", "confidentiality.md"}
     )
 
     for md_path in md_files:

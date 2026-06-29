@@ -17,8 +17,8 @@ repository:
 sphinx:
   config:
     html_theme: sphinx_book_theme
-    html_meta:
-      robots: "noindex, nofollow"
+    templates_path: ["_templates"]
+    exclude_patterns: ["CONFIDENTIALITY.md"]
     html_css_files:
       - glossary.css
     html_js_files:
