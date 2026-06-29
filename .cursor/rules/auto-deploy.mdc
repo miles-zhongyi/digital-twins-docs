@@ -1,0 +1,42 @@
+---
+description: Auto-commit and deploy Jupyter Book changes via GitHub Actions
+globs: TwinsDocumentation/**
+alwaysApply: false
+---
+
+# Auto-deploy Digital Twins documentation
+
+This repo (`TwinsDocumentation`) deploys to GitHub Pages on every push to `main` via `.github/workflows/deploy.yml`.
+
+## After any documentation change
+
+When you modify book content, config, assets, StatiCrypt template, or deploy workflow in this project:
+
+1. **Verify** the change works when non-trivial (e.g. `jupyter-book build . --warningiserror` for content/config changes).
+2. **Commit** all related files with a clear message.
+3. **Deploy** by pushing to `main`:
+   ```powershell
+   cd D:\DodonaData\Documentation\TwinsDocumentation
+   gh auth setup-git
+   git add <changed-files>
+   git commit -m "<message>"
+   git push origin main
+   ```
+4. **Confirm** the GitHub Actions run started (`gh run list --repo miles-zhongyi/digital-twins-docs --limit 1`).
+
+Do not leave documentation changes uncommitted or unpushed unless the user explicitly asks to hold them.
+
+## Repo details
+
+- Remote: `https://github.com/miles-zhongyi/digital-twins-docs.git`
+- Branch: `main`
+- Live site: `https://miles-zhongyi.github.io/digital-twins-docs/`
+- Build: Jupyter Book → StatiCrypt encrypt → GitHub Pages artifact
+
+## If `git push` fails with 401
+
+```powershell
+gh auth login
+gh auth setup-git
+git push origin main
+```

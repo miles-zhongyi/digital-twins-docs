@@ -34,8 +34,10 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Copy logo for password page
-        run: cp dodonaLogo.png _build/html/dodonaLogo.png
+      - name: Copy assets for password page
+        run: |
+          cp dodonaLogo.png _build/html/dodonaLogo.png
+          cp srsTwin_icon.png _build/html/srsTwin_icon.png
 
       - name: Password-protect the built site
         working-directory: _build

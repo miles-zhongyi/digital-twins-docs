@@ -1,11 +1,12 @@
 title: Digital Twins Project Documentation
 author: DodonaData
-logo: ""
+logo: srsTwin_icon.png
 
 execute:
   execute_notebooks: "off"
 
 html:
+  favicon: srsTwin_icon.png
   use_issues_button: true
   use_repository_button: true
 
