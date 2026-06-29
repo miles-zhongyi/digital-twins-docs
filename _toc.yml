@@ -1,6 +1,7 @@
 format: jb-book
 root: intro
 chapters:
+  - file: glossary
   - file: poc_stresstest/overview
     sections:
       - file: poc_stresstest/architecture
@@ -8,6 +9,7 @@ chapters:
       - file: poc_stresstest/usage_and_roadmap
   - file: srstwin/overview
     sections:
+      - file: srstwin/structure_and_implementation
       - file: srstwin/lte_digital_twin
       - file: srstwin/sa_signaling_storm
       - file: srstwin/design_principles

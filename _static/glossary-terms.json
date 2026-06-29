@@ -1,0 +1,320 @@
+[
+  {
+    "id": "uplink-downlink",
+    "term": "Uplink and Downlink",
+    "aliases": ["uplink and downlink", "uplink", "downlink"],
+    "definition": "Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs."
+  },
+  {
+    "id": "c-plane",
+    "term": "C-Plane",
+    "aliases": ["c-plane", "c plane", "control plane", "Control Plane"],
+    "definition": "The control plane handles planning and instructions but does not carry actual user data. It contains commands for how the user and their data should be handled, receives real-time scheduling instructions (beamforming weights, PRB allocations) from the DU, and tells the RU what UE data to modulate or demodulate."
+  },
+  {
+    "id": "u-plane",
+    "term": "U-Plane",
+    "aliases": ["u-plane", "u plane", "user plane", "User Plane"],
+    "definition": "The user plane is the pipeline where actual user data flows as IQ samples. On downlink it unpacks DU IQ samples for RF transmission; on uplink it converts received waveforms into IQ vectors sent to the DU over fronthaul. It often relies on high-throughput hardware such as smartNIC FPGA or DPDK."
+  },
+  {
+    "id": "ru",
+    "term": "RU",
+    "aliases": ["radio unit", "Radio Unit"],
+    "definition": "Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions."
+  },
+  {
+    "id": "fronthaul",
+    "term": "Fronthaul Interface",
+    "aliases": ["fronthaul interface", "fronthaul", "RU Fronthaul", "ru fronthaul"],
+    "definition": "The connection between the RU and DU carrying low-level radio data, often IQ samples over protocols like eCPRI or Open Fronthaul."
+  },
+  {
+    "id": "ecpri",
+    "term": "eCPRI",
+    "aliases": ["ecpri", "enhanced Common Public Radio Interface"],
+    "definition": "Enhanced Common Public Radio Interface — a protocol that packages IQ samples into standard ethernet frames for efficient transport on fiber between RU and DU."
+  },
+  {
+    "id": "asn1",
+    "term": "ASN.1",
+    "aliases": ["asn.1", "asn1"],
+    "definition": "A schema language for telecom messages: a strict protocol blueprint defining what messages exist, their fields, mandatory vs optional fields, choices, and value types."
+  },
+  {
+    "id": "asn1-wrapper",
+    "term": "ASN.1 Wrapper",
+    "aliases": ["asn.1 wrapper", "asn1 wrapper"],
+    "definition": "The message body wrapped inside UL-DCCH-Message → message → c1."
+  },
+  {
+    "id": "ul-dcch-message",
+    "term": "UL-DCCH-Message",
+    "aliases": ["ul-dcch-message", "UL DCCH Message"],
+    "definition": "Uplink (UE → eNB) dedicated control channel message — an LTE RRC ASN.1 container for UE-to-eNB dedicated RRC messages sent after a dedicated RRC connection exists."
+  },
+  {
+    "id": "ul-ccch-message",
+    "term": "UL-CCCH-Message",
+    "aliases": ["ul-ccch-message", "UL CCCH Message"],
+    "definition": "Uplink common control channel message used before a dedicated RRC connection exists, e.g. rrcConnectionRequest."
+  },
+  {
+    "id": "pycrate",
+    "term": "Pycrate",
+    "aliases": ["pycrate matching", "Pycrate Matching"],
+    "definition": "Python ASN.1 toolkit used to load UL-DCCH-Message definitions and validate that reconstructed messages match the expected ASN.1 structure and fields."
+  },
+  {
+    "id": "plmn",
+    "term": "PLMN",
+    "aliases": ["plmn", "public land mobile network", "Public Land Mobile Network"],
+    "definition": "Public Land Mobile Network — identifies a mobile operator network via MCC (mobile country code) and MNC (mobile network code). Example: 302/221 is TELUS in Canada."
+  },
+  {
+    "id": "s1ap",
+    "term": "S1AP",
+    "aliases": ["s1ap", "S1 Application Protocol", "s1 application protocol"],
+    "definition": "S1 Application Protocol — a control-plane protocol between 4G eNB and EPC/MME handling communications between the base station and core network."
+  },
+  {
+    "id": "srsepc",
+    "term": "srsEPC",
+    "aliases": ["srsepc", "srs EPC"],
+    "definition": "srsRAN's simplified 4G core containing MME, SGW, PGW, and HSS. Authenticates srsUE and assigns an IP address."
+  },
+  {
+    "id": "zmq-iq",
+    "term": "ZMQ IQ",
+    "aliases": ["zmq iq", "ZMQ IQ samples"],
+    "definition": "Simulated radio link over network sockets where radio signals are represented as IQ samples with in-phase (I) and quadrature (Q) components."
+  },
+  {
+    "id": "zmq-rf-driver",
+    "term": "ZMQ RF driver",
+    "aliases": ["zmq rf driver", "ZMQ RF Driver"],
+    "definition": "A fake RF driver that pipes IQ samples over ZeroMQ sockets instead of real SDR hardware, enabling a digital twin on a plain server."
+  },
+  {
+    "id": "sdr",
+    "term": "SDR",
+    "aliases": ["sdr", "software defined radio", "Software Defined Radio"],
+    "definition": "Software-defined radio — programmable radio hardware controlled by software, used to transmit/receive real RF signals instead of ZMQ simulation."
+  },
+  {
+    "id": "imsi",
+    "term": "IMSI",
+    "aliases": ["imsi", "International Mobile Subscriber Identity"],
+    "definition": "International Mobile Subscriber Identity — uniquely identifies a SIM/subscriber attempting to attach."
+  },
+  {
+    "id": "ki",
+    "term": "Ki",
+    "aliases": ["ki"],
+    "definition": "Secret authentication key stored in the SIM and operator subscriber database."
+  },
+  {
+    "id": "opc",
+    "term": "OPc",
+    "aliases": ["opc", "OPc"],
+    "definition": "Operator-specific authentication value used with Milenage to prove the UE/SIM and network share the correct secret."
+  },
+  {
+    "id": "sim-credentials",
+    "term": "SIMCredentials",
+    "aliases": ["simcredentials", "sim credentials", "SIM credentials"],
+    "definition": "Subscriber identity and secrets needed for network authentication: IMSI, Ki, OP/OPc, and the authentication algorithm."
+  },
+  {
+    "id": "hss",
+    "term": "HSS",
+    "aliases": ["hss", "home subscriber server", "Home Subscriber Server"],
+    "definition": "Home Subscriber Server — the 4G subscriber database storing IMSI, Ki, OPc, allowed APN, and QoS. The MME queries HSS during attach for validity and authentication challenges."
+  },
+  {
+    "id": "udm",
+    "term": "UDM",
+    "aliases": ["udm", "Unified Data Management"],
+    "definition": "Unified Data Management — the 5G equivalent of the HSS subscriber database."
+  },
+  {
+    "id": "hss-udm-provisioning",
+    "term": "HSS/UDM provisioning",
+    "aliases": ["hss/udm provisioning", "subscriber provisioning"],
+    "definition": "Adding subscriber records (IMSI, keys, profiles) into the network subscriber database."
+  },
+  {
+    "id": "3gpp",
+    "term": "3GPP",
+    "aliases": ["3gpp"],
+    "definition": "3rd Generation Partnership Project — the international standards body defining mobile network protocols. srsRAN and OCUDU implement 3GPP specifications."
+  },
+  {
+    "id": "webhook",
+    "term": "Webhook Endpoints",
+    "aliases": ["webhook endpoints", "webhook", "webhooks"],
+    "definition": "URLs on your server that another system calls automatically when an event occurs (push), instead of the client polling repeatedly."
+  },
+  {
+    "id": "cell",
+    "term": "Cell",
+    "aliases": ["cell"],
+    "definition": "One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell."
+  },
+  {
+    "id": "tx-rx-streams",
+    "term": "TX and RX streams",
+    "aliases": ["tx and rx streams", "tx stream", "rx stream", "TX stream", "RX stream"],
+    "definition": "TX = transmit, RX = receive. A stream is the continuous flow of IQ samples. UE TX (uplink) must reach gNB RX; gNB TX (downlink) must reach each UE RX."
+  },
+  {
+    "id": "gnu-radio-broker",
+    "term": "GNU Radio broker",
+    "aliases": ["gnu radio broker", "GNU Radio broker / combiner", "gnu radio combiner"],
+    "definition": "Signal-processing pipeline that sums many UE uplink TX streams into one gNB RX input and fans gNB downlink TX out to every UE RX — replicating over-the-air combining in software."
+  },
+  {
+    "id": "du",
+    "term": "DU",
+    "aliases": ["du", "distributed unit", "Distributed Unit", "software DU"],
+    "definition": "Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot."
+  },
+  {
+    "id": "cu",
+    "term": "CU",
+    "aliases": ["cu", "centralized unit", "Centralized Unit"],
+    "definition": "Centralized Unit — higher layers (PDCP/RRC) in a split base station, less time-critical than the DU. Connects to DU over F1."
+  },
+  {
+    "id": "nrcsl",
+    "term": "NRCSL",
+    "aliases": ["nrcsl", "NR CSL"],
+    "definition": "Call/session log records carrying Non-SA (NSA) tags where NR runs as a secondary node on an LTE anchor and EPC core."
+  },
+  {
+    "id": "sanrcsl",
+    "term": "SANRCSL",
+    "aliases": ["sanrcsl", "SA NR CSL"],
+    "definition": "SA NR CSL — same log type as NR CSL but in standalone mode where NR is the primary radio with a 5G core."
+  },
+  {
+    "id": "csl-trc",
+    "term": "CSL",
+    "aliases": ["csl", "CSL compared to TrC"],
+    "definition": "Call/session log with lower granularity than TrC — contains KPIs such as radio conditions, RSRP, durations, and session info rather than individual signaling messages."
+  },
+  {
+    "id": "trc",
+    "term": "TrC",
+    "aliases": ["trc"],
+    "definition": "Trace record with per-message signaling detail for a call session, higher granularity than CSL."
+  },
+  {
+    "id": "per-encoding",
+    "term": "PER encoding",
+    "aliases": ["per encoding", "PER", "per", "Packed Encoding Rules"],
+    "definition": "Packed Encoding Rules — compact binary encoding of ASN.1 structures for RRC/NAS Layer-3 messages. Decoupling from PHY does not mean skipping PER encoding."
+  },
+  {
+    "id": "phy",
+    "term": "PHY",
+    "aliases": ["phy", "physical layer"],
+    "definition": "Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely."
+  },
+  {
+    "id": "ofdm",
+    "term": "OFDM",
+    "aliases": ["ofdm", "Orthogonal Frequency Division Multiplexing"],
+    "definition": "Orthogonal Frequency Division Multiplexing — splits bandwidth into parallel narrow sub-carriers, each carrying a slow stream. Resource mapping places IQ points on the OFDM time-frequency grid."
+  },
+  {
+    "id": "modulation",
+    "term": "Modulation",
+    "aliases": ["modulation"],
+    "definition": "Turning bits into a physical radio wave by varying amplitude and phase of a sinusoidal carrier."
+  },
+  {
+    "id": "markov-model",
+    "term": "Markov model",
+    "aliases": ["markov model", "procedure-sequence markov model", "Procedure-sequence Markov model"],
+    "definition": "Memoryless model where the next procedure depends only on the current state. Built from TrC data as states and transition probabilities between multi-message procedures (RRC setup, registration, etc.)."
+  },
+  {
+    "id": "oai",
+    "term": "OAI",
+    "aliases": ["oai", "Open Air Interface"],
+    "definition": "Open Air Interface — open-source 4G/5G access network implementation including UE, gNB, and other network elements."
+  },
+  {
+    "id": "du-mac-scheduler",
+    "term": "DU MAC Scheduler",
+    "aliases": ["du mac scheduler", "DU MAC", "mac scheduler", "MAC scheduler"],
+    "definition": "Medium Access Control in the DU manages shared radio access: who transmits when, retransmissions, and multiplexing on the time-frequency grid per slot."
+  },
+  {
+    "id": "rnti",
+    "term": "RNTI",
+    "aliases": ["rnti", "Radio Network Temporary Identifier"],
+    "definition": "Radio Network Temporary Identifier — a 16-bit temporary tag identifying each UE on the radio."
+  },
+  {
+    "id": "ue",
+    "term": "UE",
+    "aliases": ["ue", "user equipment", "User Equipment"],
+    "definition": "User Equipment — the mobile device (phone/modem) that attaches to the cellular network."
+  },
+  {
+    "id": "enb",
+    "term": "eNB",
+    "aliases": ["enb", "enodeb", "eNodeB"],
+    "definition": "Evolved Node B — the 4G LTE base station connecting UEs to the EPC over S1AP."
+  },
+  {
+    "id": "epc",
+    "term": "EPC",
+    "aliases": ["epc", "Evolved Packet Core"],
+    "definition": "Evolved Packet Core — the 4G core network (MME, SGW, PGW, HSS) handling mobility, authentication, and sessions."
+  },
+  {
+    "id": "mme",
+    "term": "MME",
+    "aliases": ["mme"],
+    "definition": "Mobility Management Entity — 4G core control node handling attach, authentication, and bearer setup with the eNB over S1AP."
+  },
+  {
+    "id": "iq-samples",
+    "term": "IQ samples",
+    "aliases": ["iq samples", "IQ sample", "iq sample"],
+    "definition": "Complex-valued in-phase and quadrature samples representing a modulated radio waveform digitally."
+  },
+  {
+    "id": "dpdk",
+    "term": "DPDK",
+    "aliases": ["dpdk", "Data Plane Development Kit"],
+    "definition": "Data Plane Development Kit — high-throughput userspace networking framework often used for U-Plane IQ processing."
+  },
+  {
+    "id": "rrc",
+    "term": "RRC",
+    "aliases": ["rrc", "Radio Resource Control"],
+    "definition": "Radio Resource Control — Layer 3 protocol between UE and base station for connection setup, mobility, and bearer configuration."
+  },
+  {
+    "id": "nas",
+    "term": "NAS",
+    "aliases": ["nas", "Non-Access Stratum"],
+    "definition": "Non-Access Stratum — Layer 3 protocol between UE and core for attach, authentication, and session management."
+  },
+  {
+    "id": "prb",
+    "term": "PRB",
+    "aliases": ["prb", "PRBs", "physical resource block"],
+    "definition": "Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler."
+  },
+  {
+    "id": "rach",
+    "term": "RACH",
+    "aliases": ["rach", "Random Access Channel"],
+    "definition": "Random Access Channel — procedure for a UE to request initial access to a cell (preamble, response, connection setup)."
+  }
+]

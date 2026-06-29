@@ -4,6 +4,8 @@ Documentation for the Digital Twins monorepo: two complementary digital
 twins of a cellular radio network, built to test capacity and protocol
 behavior without real towers, spectrum, or subscribers.
 
+- **[Glossary](glossary.md)** — telecom and project terms (highlighted
+  throughout the book; hover or click for definitions).
 - **[poc_StressTest](poc_stresstest/overview.md)** — a lightweight,
   large-scale software twin (DU/RU cluster + asyncio UE simulator) for
   capacity and admission-control stress testing.

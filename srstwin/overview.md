@@ -22,7 +22,7 @@ questions:
 | Core software | srsRAN_4G (`srsue`, `srsenb`, `srsepc`) | srsRAN-Project `gnb` ("OCUDU") + Open5GS |
 | Question it answers | Does this *exact* real subscriber's call flow behave correctly? | What does *core-network signaling load* look like at hundreds of UEs? |
 | Scale | 1 UE, or up to 3 independent eNB+UE pairs sharing one EPC | 2-8 RF-real UEs (Layer A) + hundreds of PHY-abstract UEs (Layer B) |
-| See | [`lte_digital_twin.md`](lte_digital_twin.md) | [`sa_signaling_storm.md`](sa_signaling_storm.md) |
+| See | [`structure_and_implementation.md`](structure_and_implementation.md), [`lte_digital_twin.md`](lte_digital_twin.md) | [`sa_signaling_storm.md`](sa_signaling_storm.md) |
 
 Both twins are validated against the **same real-world data source**: decoded
 LTE call traces from a real TELUS network (`22_decoded/`, shared with
