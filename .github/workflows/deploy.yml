@@ -27,6 +27,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Verify StatiCrypt password secret is configured
+        env:
+          STATICRYPT_PASSWORD: ${{ secrets.STATICRYPT_PASSWORD }}
+        run: |
+          if [ -z "$STATICRYPT_PASSWORD" ]; then
+            echo "::error::STATICRYPT_PASSWORD secret is not set. See CONFIDENTIALITY.md."
+            exit 1
+          fi
+
       - name: Annotate glossary terms in markdown
         run: python scripts/annotate_glossary.py
 

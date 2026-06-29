@@ -86,7 +86,7 @@ quantity rather than noise.
 ## 7. Before an invasive low-level change, write the risk register before the code
 
 The `realizer/` plan's `PLAN.md` lists concrete, specific risks for hosting
-N <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> contexts on one shared <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span> worker — grant misrouting between UEs
+N UE contexts on one shared PHY worker — grant misrouting between UEs
 sharing one dispatch layer, per-UE RA timers colliding, PDCCH blind-search
 budget degrading silently at higher N, the per-TTI real-time deadline being
 missed and desyncing the whole <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>, <span class="glossary-term" data-glossary-id="harq" data-glossary-term="HARQ" data-glossary-definition="Hybrid Automatic Repeat Request — L1/L2 retransmission mechanism whose timing RRC procedures depend on." tabindex="0" role="button">HARQ</span> soft-buffer memory scaling with

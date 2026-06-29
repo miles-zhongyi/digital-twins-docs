@@ -28,7 +28,7 @@ TELUS network (`22_decoded/`, <span class="glossary-term" data-glossary-id="plmn
   sends are built from real observed structure, not invented from
   scratch.
 - **`srsTwin`** injects a real trace record's *identity* fields directly
-  into a live simulated <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span>'s first <span class="glossary-term" data-glossary-id="rrc" data-glossary-term="RRC" data-glossary-definition="Radio Resource Control — Layer 3 protocol between UE and base station for connection setup, mobility, and bearer configuration." tabindex="0" role="button">RRC</span> message (see
+  into a live simulated UE's first RRC message (see
   [`srstwin/lte_digital_twin.md`](srstwin/lte_digital_twin.md)), so the
   resulting live signaling is byte-comparable to what that real subscriber's
   phone actually produced.
@@ -44,7 +44,7 @@ to different stages of the same testing question:
 
 - **srsTwin**, at small scale, answers "does this *exact* message sequence
   behave correctly?" — protocol-exact validation, useful whenever a real
-  stack's behavior (or a real <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span>'s, once srsTwin's 5G <span class="glossary-term" data-glossary-id="cu" data-glossary-term="CU" data-glossary-definition="Centralized Unit — higher layers (PDCP/RRC) in a split base station, less time-critical than the DU. Connects to DU over F1." tabindex="0" role="button">CU</span>/DU split exists)
+  stack's behavior (or a real DU's, once srsTwin's 5G <span class="glossary-term" data-glossary-id="cu" data-glossary-term="CU" data-glossary-definition="Centralized Unit — higher layers (PDCP/RRC) in a split base station, less time-critical than the DU. Connects to DU over F1." tabindex="0" role="button">CU</span>/DU split exists)
   needs to be trusted, not approximated.
 - **poc_StressTest**, at large scale, answers "does the *system* hold up
   under this much load?" — capacity, admission control, and handover
@@ -61,7 +61,7 @@ weaken the fidelity of the layer that's there to be trusted.
 
 ## A concrete number for what the trade-off costs
 
-srsTwin's 3-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> demo (see
+srsTwin's 3-UE demo (see
 [`srstwin/lte_digital_twin.md`](srstwin/lte_digital_twin.md)) measured,
 rather than estimated, what running 3 real protocol stacks concurrently on
 one host costs relative to one running alone: **<span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> processing delay rose

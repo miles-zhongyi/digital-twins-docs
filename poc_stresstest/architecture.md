@@ -35,12 +35,12 @@ how the multiplexing works in a real RAN:
   <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span> sites means three F1 sockets on the DU, no matter whether the UE simulator is
   running 1 <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> or 5000.
 
-The <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> side of the same connection is `DU.serve_f1()`: one `async def` per <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span>
+The DU side of the same connection is `DU.serve_f1()`: one `async def` per RU
 connection, looping on `P.async_recv_msg(reader)`, dispatching synchronously, and
 echoing `msg.get("txn")` back on the reply so the RU's `_reader_loop` can find the
 right future. `F1Link` also handles reconnection (`_reconnect_loop`, exponential
 backoff capped at 5s) and fails every pending future with `ConnectionError` if the
-DU link drops, so an F1 outage doesn't hang <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> coroutines indefinitely — the Uu
+DU link drops, so an F1 outage doesn't hang UE coroutines indefinitely — the Uu
 side stays up while F1 reconnects in the background.
 
 ## Wire protocol
@@ -54,10 +54,10 @@ side stays up while F1 reconnects in the background.
 
 `send_msg`/`recv_msg` are the blocking (socket) variants; `async_send_msg`/
 `async_recv_msg` are the asyncio `StreamWriter`/`StreamReader` variants actually
-used by the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span>, <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span>, and <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> simulator. `async_recv_msg` raises
+used by the DU, RU, and UE simulator. `async_recv_msg` raises
 `asyncio.IncompleteReadError` on a clean EOF, which all three servers catch as "the
-peer went away." Because every UE→DU <span class="glossary-term" data-glossary-id="uplink-downlink" data-glossary-term="Uplink and Downlink" data-glossary-definition="Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs." tabindex="0" role="button">uplink</span> elicits exactly one DU→UE downlink, the
-RU can be a synchronous transparent proxy: receive from the <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span>, stamp RF/<span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>
+peer went away." Because every UE→<span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> <span class="glossary-term" data-glossary-id="uplink-downlink" data-glossary-term="Uplink and Downlink" data-glossary-definition="Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs." tabindex="0" role="button">uplink</span> elicits exactly one DU→UE downlink, the
+RU can be a synchronous transparent proxy: receive from the UE, stamp RF/<span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>
 context, forward over F1, receive the one reply, relay it back. There is no
 internal queueing, reordering, or batching logic in the RU's per-UE loop.
 
@@ -74,9 +74,9 @@ names.
 Every wire message has a realistic envelope — `message_name`, `interface`,
 `protocol`, `decoded`, plus fields like `cell_id`, `m_tmsi`, `timestamp` that look
 exactly like fields a real decoded LTE trace record would have — and a top-level
-`txn` used only for the <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span>'s F1 request/reply correlation. Riding alongside that,
+`txn` used only for the RU's F1 request/reply correlation. Riding alongside that,
 under the key `_twin`, is a sidecar dict holding everything that is simulation
-state but has no analogue in a real captured trace: `ue_id`, `cell` (the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span>'s pool
+state but has no analogue in a real captured trace: `ue_id`, `cell` (the DU's pool
 key for the serving sector — not the same as the envelope's cosmetic numeric
 `cell_id`), `rf` (the RSRP/SINR snapshot), `demand_mbps`, `allocated_prbs`, `mcs`,
 `cause`, `step`, `congested`, and so on.
@@ -87,14 +87,14 @@ fills a template to get the realistic envelope, then attaches
 out `None` values). The accessor `twin(msg)` (also exported from
 `common/signaling/__init__.py`) just returns `msg.get("_twin") or {}`.
 
-This separation is deliberate and load-bearing throughout the codebase: the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span>'s
+This separation is deliberate and load-bearing throughout the codebase: the DU's
 handlers (`handle_setup`, `handle_measurement`, `handle_data`, `handle_release` in
 `du_server.py`) read `tw = twin(msg)` and pull `tw["ue_id"]`, `tw["cell"]`,
 `tw["rf"]["sinr_dl_db"]`, `tw["demand_mbps"]` to do admission math — none of that
-functional state lives in or competes with the realistic envelope fields. The <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span>'s
-`serve_ue()` stamps `tw["cell"]` and `tw["rf"]` (computed from <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> geometry) into the
+functional state lives in or competes with the realistic envelope fields. The RU's
+`serve_ue()` stamps `tw["cell"]` and `tw["rf"]` (computed from UE geometry) into the
 sidecar before forwarding uplinks, while writing the cosmetic numeric `cell_id`
-separately onto the top-level envelope via `_CELL_NUM`. The DU classifies an <span class="glossary-term" data-glossary-id="uplink-downlink" data-glossary-term="Uplink and Downlink" data-glossary-definition="Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs." tabindex="0" role="button">uplink</span>
+separately onto the top-level envelope via `_CELL_NUM`. The DU classifies an uplink
 by its real `message_name` (`CATALOG.classify(msg)`), never by anything in `_twin`
 — `_twin` is consulted only after the message has already been identified as a
 real procedure.
@@ -107,8 +107,8 @@ per-technology catalog that maps it onto real message names.
 **Flow (`common/signaling/procedures.py`).** Because the Uu/F1 link is a strict
 one-<span class="glossary-term" data-glossary-id="uplink-downlink" data-glossary-term="Uplink and Downlink" data-glossary-definition="Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs." tabindex="0" role="button">uplink</span> → one-reply exchange, a fuller call flow is modelled as an ordered
 sequence of `Step(name, uplink, downlink, action)` tuples, each pairing one logical
-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> uplink with the one logical network downlink it elicits. `action` is one of
-`ACT_NONE`, `ACT_ADMIT`, `ACT_RECONFIG`, `ACT_RELEASE` and tells the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> what
+UE uplink with the one logical network downlink it elicits. `action` is one of
+`ACT_NONE`, `ACT_ADMIT`, `ACT_RECONFIG`, `ACT_RELEASE` and tells the DU what
 capacity-affecting work (if any) to do at that step. The defined flows are:
 
 - `ATTACH_FLOW` — `RRC_CONNECTION_REQUEST → RRC_CONNECTION_SETUP`, `..._SETUP_COMPLETE
@@ -135,7 +135,7 @@ real name, fills the template with a per-call `_token_context` (timestamps,
 `m_tmsi`, <span class="glossary-term" data-glossary-id="s1ap" data-glossary-term="S1AP" data-glossary-definition="S1 Application Protocol — a control-plane protocol between 4G eNB and EPC/MME handling communications between the base station and core network." tabindex="0" role="button">S1AP</span> ids, the canonical `record_id`, the cosmetic numeric `cell_id`), and
 attaches the `_twin` sidecar. `catalog.classify(msg)` looks up `msg["message_name"]`
 in a precomputed `real-uplink-name → Step` map (falling back to the `_twin.step`
-field, then `None`) so the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> knows which handler and which <span class="glossary-term" data-glossary-id="uplink-downlink" data-glossary-term="Uplink and Downlink" data-glossary-definition="Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs." tabindex="0" role="button">downlink</span> to use.
+field, then `None`) so the DU knows which handler and which downlink to use.
 `get_catalog()` (in `common/signaling/__init__.py`) selects the catalog class by the
 `RADIO_TECH` environment variable (default `lte`) and caches instances.
 
@@ -170,7 +170,7 @@ the flow/admission logic.
 ## RF and capacity model
 
 `common/rf_model.py` implements a single, coherent chain used identically by the
-<span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span> (to compute RF for an <span class="glossary-term" data-glossary-id="uplink-downlink" data-glossary-term="Uplink and Downlink" data-glossary-definition="Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs." tabindex="0" role="button">uplink</span>) and the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> (to size a <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRB</span> grant):
+RU (to compute RF for an uplink) and the DU (to size a PRB grant):
 
 ```
 distance + tx power --(path loss)--> RSRP / SINR --(Shannon)--> spectral efficiency --> PRB requirement
@@ -191,66 +191,66 @@ distance + tx power --(path loss)--> RSRP / SINR --(Shannon)--> spectral efficie
   achievable per-PRB Mbps, then `ceil(demand_mbps / per_prb)` PRBs to meet a
   target demand.
 - `prbs_for_voip()` — VoIP is *not* sized from `demand_mbps`: it reserves a fixed
-  1 <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRB</span> (good RF) or 2 PRBs (`sinr_db < 5.0`, marginal RF), capped by
-  `VOIP_MAX_PRBS = 2`, matching how real VoLTE schedulers grant 1–2 PRBs per slot
+  1 PRB (good RF) or 2 PRBs (`sinr_db < 5.0`, marginal RF), capped by
+  `VOIP_MAX_PRBS = 2`, matching how real VoLTE schedulers grant 1–2 <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRBs</span> per slot
   rather than scaling with the codec's actual ~12–48 kbps.
 - `prbs_for_traffic(demand_mbps, sinr, scs_khz, profile)` — the single entry point
-  the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> calls; dispatches to `prbs_for_demand` (uncapped) for `profile="data"` or
+  the DU calls; dispatches to `prbs_for_demand` (uncapped) for `profile="data"` or
   `prbs_for_voip` for `profile="voip"` (the default).
 
 The model is explicitly single-layer (no MIMO), tuned to land in realistic ranges
-for an n78 (3.5 GHz), 100 MHz macro <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>. Beyond roughly 1.3 km a <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> falls out of
+for an n78 (3.5 GHz), 100 MHz macro cell. Beyond roughly 1.3 km a <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> falls out of
 coverage and any admission attempt is rejected with `cause="no-coverage"`.
 
 Sector antennas are modelled separately: `sector_antenna_gain_db()` applies a
 120°-wide pattern (`SECTOR_WIDTH_DEG`) with an 18 dB edge rolloff
 (`SECTOR_EDGE_LOSS_DB`) quadratic in the angle off boresight, and returns
 `NO_COVERAGE_GAIN_DB = -999.0` outside the sector — `link_rf()` (the function both
-the <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span>'s `compute_rf()` and the <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span>'s `rsrp_from()` call) uses this to decide
+the <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span>'s `compute_rf()` and the UE's `rsrp_from()` call) uses this to decide
 `in_sector` and synthesizes a deep-fade RF snapshot (`rsrp_dl_dbm=-140.0`,
-SINR below `MIN_SINR_DB`) when the UE is outside the <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>'s fan.
+SINR below `MIN_SINR_DB`) when the UE is outside the cell's fan.
 
 ## Handover
 
-Handover decision-making lives entirely on the <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> side, in `ue/ue_sim.py`'s
-`one_session()` — the <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span> and <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> are passive with respect to *which* <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span> a UE
+Handover decision-making lives entirely on the UE side, in `ue/ue_sim.py`'s
+`one_session()` — the RU and <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> are passive with respect to *which* <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span> a UE
 should be on; they only react to what the UE tells them.
 
-`_parse_rus()` flattens the `RU_LIST` environment variable (a JSON array of <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span>
+`_parse_rus()` flattens the `RU_LIST` environment variable (a JSON array of RU
 *sites*, each with `host`, `port`, `x`, `y`, and a `sectors` list of
-`{cell, azimuth}`) into one flat link per sector <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>, all sharing their site's
+`{cell, azimuth}`) into one flat link per sector cell, all sharing their site's
 host/port/coordinates. `rsrp_from(ru, pos)` calls the same `rf.link_rf()` function
 the RU's `compute_rf()` uses, with the same tx power, frequency, gain, and sector
-width defaults — so the <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span>'s view of signal strength is computed by the identical
+width defaults — so the UE's view of signal strength is computed by the identical
 path-loss/sector model the network side uses, not an approximation of it.
 `best_ru(pos)` returns the RU/sector with the highest estimated RSRP for a
 position, evaluated across every sector of every site in `RUS`.
 
 The handover trigger is A3-style hysteresis: in the periodic measurement block of
-`one_session()`, the <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> recomputes `target = best_ru(pos)` and hands over only if
+`one_session()`, the UE recomputes `target = best_ru(pos)` and hands over only if
 `target["name"] != serving["name"]` **and**
 `rsrp_from(target, pos) >= rsrp_from(serving, pos) + HO_MARGIN_DB` (default 3 dB,
-`HO_MARGIN_DB` env var). This margin prevents ping-pong handovers right at a <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>
+`HO_MARGIN_DB` env var). This margin prevents ping-pong handovers right at a cell
 boundary where two sectors' RSRP estimates are nearly equal. The same trigger and
 margin apply whether the candidate is a different sector of the *same* site
 (inter-sector) or a sector of a *different* site (inter-site) — the UE does not
 distinguish the two cases.
 
 The handover itself is make-before-break: `_attach(target, ...)` walks the full
-attach flow and opens a brand-new socket to the target <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>, and only if that
-attach is *not* rejected does the <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> call `_release()` on the old socket and switch
-`serving` to the target. If the target rejects (no coverage, no free <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRBs</span>), the UE
+attach flow and opens a brand-new socket to the target cell, and only if that
+attach is *not* rejected does the UE call `_release()` on the old socket and switch
+`serving` to the target. If the target rejects (no coverage, no free PRBs), the UE
 stays on the original cell and counts a `ho_fail`. Because the target's admission
-runs while the source session is still technically active, the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span>'s
+runs while the source session is still technically active, the DU's
 `handle_setup()` explicitly guards against double-counting: it calls
-`_release_ue_other_cells(ue_id, cell.cell_id)` before granting the target cell's
-PRBs, clearing any stale session for that `ue_id` on every other <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span> so a UE is
+`_release_ue_other_cells(ue_id, cell.cell_id)` before granting the target <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>'s
+PRBs, clearing any stale session for that `ue_id` on every other cell so a UE is
 never billed for PRBs on two cells at once during the overlap window.
 
 ## The three servers, briefly
 
-- **<span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span>** (`du/du_server.py`) — one `Cell` (<span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRB</span> pool, `used_prbs`/`total_prbs`)
-  per <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span> id, lazily created on first reference. `dispatch()` classifies an
+- **DU** (`du/du_server.py`) — one `Cell` (PRB pool, `used_prbs`/`total_prbs`)
+  per cell id, lazily created on first reference. `dispatch()` classifies an
   <span class="glossary-term" data-glossary-id="uplink-downlink" data-glossary-term="Uplink and Downlink" data-glossary-definition="Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs." tabindex="0" role="button">uplink</span> via the catalog and routes by `step.action` to `handle_setup` /
   `handle_measurement` / `handle_data` / `handle_release` / `handle_passthrough`
   (for flow steps with no capacity action, like <span class="glossary-term" data-glossary-id="rrc" data-glossary-term="RRC" data-glossary-definition="Radio Resource Control — Layer 3 protocol between UE and base station for connection setup, mobility, and bearer configuration." tabindex="0" role="button">RRC</span> setup or security mode). All
@@ -261,16 +261,16 @@ never billed for PRBs on two cells at once during the overlap window.
   pre-serialized JSON snapshot (`_snap_json`) that the event loop's `monitor()`
   coroutine refreshes once a second, so the HTTP thread and the event loop never
   touch the same live structures concurrently. `serve_f1()`'s `finally` block
-  reclaims PRBs for every <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> on that connection's cells if the <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span>'s F1 link drops.
+  reclaims PRBs for every UE on that connection's cells if the RU's F1 link drops.
 - **RU** (`ru/ru_server.py`) — `compute_rf()` turns UE geometry into an RSRP/SINR
   snapshot for whichever sector the UE's own `_twin.cell` names (trusting the
-  <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span>'s choice, falling back to `best_sector()` — the RU's local strongest-sector
+  UE's choice, falling back to `best_sector()` — the RU's local strongest-sector
   pick — only if the UE names a cell that isn't one of this site's sectors or
   supplies no position). It stamps that into the uplink's `_twin` sidecar before
-  proxying through `F1.request()`. If a UE's socket drops without a clean
+  proxying through `F1.request()`. If a <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span>'s socket drops without a clean
   release, the `finally` block in `serve_ue()` sends a catalog-built
   `S1_UE_CONTEXT_RELEASE_REQUEST` on the UE's behalf so the DU still reclaims the
-  <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRBs</span>.
+  PRBs.
 - **UE simulator** (`ue/ue_sim.py`) — runs `target_num_ues` UEs as asyncio tasks
   (`run_ue`/`one_session`), each with independent identity, `Walk` mobility (a
   bounded 2-D random walk), tx power, and demand. `reconcile()` spawns or cancels
@@ -284,6 +284,6 @@ Configuration throughout is environment variables with in-code defaults,
 overridden by `docker-compose.yml` (and `docker-compose.trace.yml` for the
 trace-replay overlay, which only flips `REPLAY_MODE=1` and sets `REPLAY_SPEED`).
 One discrepancy worth noting: `du_server.py`'s in-code default for `TOTAL_PRBS` is
-`273`, but `docker-compose.yml` sets it to `250` for every <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span> — the deployed
-default is 250 <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRBs</span>/cell, matching the README/CLAUDE.md's "250 PRB each" claim; the
-273 figure only appears if the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> is run standalone with no environment override.
+`273`, but `docker-compose.yml` sets it to `250` for every cell — the deployed
+default is 250 PRBs/cell, matching the README/CLAUDE.md's "250 <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRB</span> each" claim; the
+273 figure only appears if the DU is run standalone with no environment override.

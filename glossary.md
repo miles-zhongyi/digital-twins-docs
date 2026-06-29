@@ -2,10 +2,9 @@
 
 Telecom and project terms used across this book. Marked terms in the
 documentation appear in **blue** (light theme) or **light blue** (dark theme)
-— hover or click for a definition. Within each paragraph, a term is
-highlighted on its **1st** occurrence, then again after skipping the next **2**,
-then after skipping **4**, then **8**, and so on (doubling). This page lists
-the full definitions.
+— hover or click for a definition. **Per page**, each term is highlighted on
+its 1st occurrence, then again after skipping the next 2, then 4, then 8
+(doubling). This page lists the full definitions.
 
 ```{raw} html
 <div class="glossary-index">

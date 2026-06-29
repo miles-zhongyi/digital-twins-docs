@@ -70,7 +70,7 @@ python scripts/build_message_templates.py --trace-dir 22_decoded --out data/lte_
 A missing `data/lte_templates.json` is not an error — `LteCatalog` simply falls
 back to `DEFAULT_TEMPLATES`.
 
-### Scaling <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> count
+### Scaling UE count
 
 UEs are asyncio tasks in the `ue-sim` container, not containers themselves, so
 scaling means raising `NUM_UES`, not spinning up more containers:
@@ -93,20 +93,20 @@ cores rather than more tasks in one process: `docker compose up --scale ue-sim=4
 `TRAFFIC_PROFILE` (env var on both `du` and `ue-sim`) selects how <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRBs</span> are sized
 in `common/rf_model.py`'s `prbs_for_traffic()`:
 
-- `voip` (default) — fixed 1–2 <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRBs</span> per session, independent of `demand_mbps`
+- `voip` (default) — fixed 1–2 PRBs per session, independent of `demand_mbps`
   (`prbs_for_voip()`); good RF gets 1 PRB, marginal RF (`sinr_dl_db < 5.0`) gets 2,
   capped at `VOIP_MAX_PRBS`.
-- `data` — PRBs sized from `demand_mbps` via `prbs_for_demand()`, uncapped, for
+- `data` — <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRBs</span> sized from `demand_mbps` via `prbs_for_demand()`, uncapped, for
   pure capacity stress.
 
 Switching to broadband load requires setting `TRAFFIC_PROFILE=data` and matching
-`DEMAND_MIN_MBPS`/`DEMAND_MAX_MBPS` on **both** `du` and `ue-sim` — the <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> uses
-them to size the grant logic context and the <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> uses them to generate its own
+`DEMAND_MIN_MBPS`/`DEMAND_MAX_MBPS` on **both** `du` and `ue-sim` — the DU uses
+them to size the grant logic context and the UE uses them to generate its own
 demand value, so they must agree.
 
 ### Running without Docker
 
-`./scripts/run_local.sh [num_ues]` (Linux/macOS/Git Bash) starts one <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span>, **one**
+`./scripts/run_local.sh [num_ues]` (Linux/macOS/Git Bash) starts one DU, **one**
 <span class="glossary-term" data-glossary-id="ru" data-glossary-term="RU" data-glossary-definition="Radio Unit — the physical antenna that talks directly with UEs. It converts analog RF to digital IQ samples and forwards them to the DU over ethernet, and modulates/demodulates U-Plane data per DU instructions." tabindex="0" role="button">RU</span> at the origin, and the <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> simulator directly with `python3`, setting
 `PYTHONPATH` and raising the file-descriptor `ulimit`. This path does not stand up
 the 3-RU cluster or the dashboard — it is a single-RU smoke-test path, not an
@@ -125,7 +125,7 @@ not aspirational roadmap items.
   reserved selector with no working implementation; everything that runs today —
   the message names, the `procedures.py` flow, the templates — is LTE, not NR.
   The nr.py docstring notes the intended NR flow (NR-RRC over Uu, <span class="glossary-term" data-glossary-id="ngap" data-glossary-term="NGAP" data-glossary-definition="NG Application Protocol — control-plane protocol between gNB and 5G core AMF." tabindex="0" role="button">NGAP</span> toward the
-  <span class="glossary-term" data-glossary-id="amf" data-glossary-term="AMF" data-glossary-definition="Access and Mobility Management Function — 5G core node handling registration and mobility over NGAP." tabindex="0" role="button">AMF</span>: RRC Setup, Registration Request, Authentication, Security Mode, <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span>
+  <span class="glossary-term" data-glossary-id="amf" data-glossary-term="AMF" data-glossary-definition="Access and Mobility Management Function — 5G core node handling registration and mobility over NGAP." tabindex="0" role="button">AMF</span>: RRC Setup, Registration Request, Authentication, Security Mode, UE
   Capability, Initial Context Setup, <span class="glossary-term" data-glossary-id="pdu-session" data-glossary-term="PDU Session" data-glossary-definition="5G user data session between UE and data network, established via 5GSM procedures." tabindex="0" role="button">PDU Session</span> Setup) follows the same
   `Step`-based structure and is meant to plug in once decoded NR/NGAP traces are
   available, but no such traces or catalog exist in this repository yet.
@@ -139,7 +139,7 @@ not aspirational roadmap items.
   reporting `supportedMIMO-CapabilityDL-r10: fourLayers`. That capability is
   carried in the realistic envelope (sourced from real traces) but has no effect
   on the simulated capacity math.
-- **VoIP <span class="glossary-term" data-glossary-id="prb" data-glossary-term="PRB" data-glossary-definition="Physical Resource Block — a unit of frequency-time resources on the LTE/NR grid allocated by the scheduler." tabindex="0" role="button">PRB</span> sizing is a fixed heuristic, not derived from the codec bitrate.**
+- **VoIP PRB sizing is a fixed heuristic, not derived from the codec bitrate.**
   `prbs_for_voip()`'s docstring is explicit that the 1–2 PRB grant is "not derived
   from demand_mbps" — it is a hardcoded `VOIP_MIN_PRBS = 1` / `VOIP_MAX_PRBS = 2`
   choice keyed only on whether SINR is above or below a fixed 5.0 dB threshold.
@@ -163,7 +163,7 @@ not aspirational roadmap items.
   exercise inter-site handover (only the in-Docker 3-site cluster can); anyone
   testing handover behavior locally without containers would need to hand-extend
   that script.
-- **The dashboard's single-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> call-flow ladder tracks exactly one UE at a time**
+- **The dashboard's single-UE call-flow ladder tracks exactly one <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> at a time**
   by design (`DU.trace_ue`/`trace_events` in `du_server.py` is a single slot, not
   a per-UE map), reset via `GET /trace/reset`. This is adequate for inspecting one
   representative call flow but cannot show concurrent multi-UE message

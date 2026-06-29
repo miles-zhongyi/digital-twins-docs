@@ -55,7 +55,7 @@ after enabling it).
 - **4G twin**: real, working, single- and 3-pair configurations both
   verified live. The offline <span class="glossary-term" data-glossary-id="per-encoding" data-glossary-term="PER encoding" data-glossary-definition="Packed Encoding Rules — compact binary encoding of ASN.1 structures for RRC/NAS Layer-3 messages. Decoupling from PHY does not mean skipping PER encoding." tabindex="0" role="button">PER</span>-encoding side-by-side display
   (`encode_templates.py`) has never been wired to inject real bytes into a
-  live <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> — see the `realizer/` M5 milestone below for what that would take.
+  live UE — see the `realizer/` M5 milestone below for what that would take.
 - **5G SA twin**: Layer A (real <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span>) verified up to a small pool; Layer B
   (UERANSIM) is the scale path for core-signaling load specifically because
   Layer A's lockstep ceiling makes it unsuitable for "hundreds of UEs" on
@@ -70,8 +70,8 @@ after enabling it).
 ## Roadmap: `realizer/` — N logical UEs in one `srsue` process (4G, paused)
 
 A reviewed architecture plan (`integration/realizer/PLAN.md`) to remove the
-4G twin's per-pair process/container overhead by hosting N <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> contexts
-inside one `srsue` process, sharing one <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span> worker, instead of N independent
+4G twin's per-pair process/container overhead by hosting N UE contexts
+inside one `srsue` process, sharing one PHY worker, instead of N independent
 processes each with their own ZMQ lockstep. Chosen over the alternative
 (N independent processes summed at a ZMQ hub, mirroring the 5G twin's
 Layer A) specifically because LTE <span class="glossary-term" data-glossary-id="uplink-downlink" data-glossary-term="Uplink and Downlink" data-glossary-definition="Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs." tabindex="0" role="button">uplink</span> is SC-FDMA — each UE gets disjoint
@@ -83,31 +83,31 @@ Status: **M0 complete, M1 not started, srsue's actual source untouched.**
 
 | Milestone | Scope | Status |
 |---|---|---|
-| M0 | Interfaces (`interfaces.py`), per-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> subscriber generator (`gen_user_db.py`), N=1 regression baseline + diff tool (`capture_n1_baseline.py` / `check_n1_baseline.py`) | Done |
+| M0 | Interfaces (`interfaces.py`), per-UE subscriber generator (`gen_user_db.py`), N=1 regression baseline + diff tool (`capture_n1_baseline.py` / `check_n1_baseline.py`) | Done |
 | M1 | 2 logical UEs over 1 shared <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span> worker; dispatch + grid-placement code; full attach→bearer→detach against unmodified srsenb/<span class="glossary-term" data-glossary-id="srsepc" data-glossary-term="srsEPC" data-glossary-definition="srsRAN's simplified 4G core containing MME, SGW, PGW, and HSS. Authenticates srsUE and assigns an IP address." tabindex="0" role="button">srsepc</span>; N=1 baseline diff must stay clean | Not started |
 | M2 | Parameterize to N=8; collect PDCCH miss rate, per-TTI worker time, <span class="glossary-term" data-glossary-id="harq" data-glossary-term="HARQ" data-glossary-definition="Hybrid Automatic Repeat Request — L1/L2 retransmission mechanism whose timing RRC procedures depend on." tabindex="0" role="button">HARQ</span> memory | Not started |
 | M3 | Unit-test grant routing correctness; verify only modeled PRACH collisions occur, not dispatch bugs | Not started |
-| M4 | Load harness: per-UE attach success/timing distributions, extending the dashboard's `parse_4g.py` KPI logic | Not started |
+| M4 | Load harness: per-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> attach success/timing distributions, extending the dashboard's `parse_4g.py` KPI logic | Not started |
 | M5 | Live <span class="glossary-term" data-glossary-id="pycrate" data-glossary-term="Pycrate" data-glossary-definition="Python ASN.1 toolkit used to load UL-DCCH-Message definitions and validate that reconstructed messages match the expected ASN.1 structure and fields." tabindex="0" role="button">pycrate</span> byte-injection — populate real UEs' transmitted bytes from real trace records at runtime (the missing other half of trace-identity injection, today offline-only) | Deferred until M1-M4 are solid |
 
 Each milestone in `PLAN.md` is paired with a specific risk (grant
 misrouting, RA timer collision, PDCCH blind-search budget degrading
-silently, the per-TTI real-time deadline, <span class="glossary-term" data-glossary-id="harq" data-glossary-term="HARQ" data-glossary-definition="Hybrid Automatic Repeat Request — L1/L2 retransmission mechanism whose timing RRC procedures depend on." tabindex="0" role="button">HARQ</span> buffer scaling, USIM
+silently, the per-TTI real-time deadline, HARQ buffer scaling, USIM
 credential collisions) and a concrete mitigation — see
 [`design_principles.md`](design_principles.md) §7.
 
 ## Roadmap: signaling storm
 
 - Push Layer B (UERANSIM) scale further and correlate its arrival timing
-  more tightly with Layer A's, to study mixed real-<span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span>/abstract surges more
+  more tightly with Layer A's, to study mixed real-PHY/abstract surges more
   precisely.
-- If a real external <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> becomes a target, the prerequisite is splitting
+- If a real external DU becomes a target, the prerequisite is splitting
   `ocudu`'s `gnb` into separate <span class="glossary-term" data-glossary-id="cu" data-glossary-term="CU" data-glossary-definition="Centralized Unit — higher layers (PDCP/RRC) in a split base station, less time-critical than the DU. Connects to DU over F1." tabindex="0" role="button">CU</span> and DU processes communicating over a
   real F1 socket (supported by the source, not configured here) — at that
   point Layer A's real-PHY pool would sit in front of a DU that's either
   still OCUDU's own or an actual third-party <span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span>, with the rest of the
   pipeline unchanged.
-- `*_heavy` RF profiles (CFO + <span class="glossary-term" data-glossary-id="uplink-downlink" data-glossary-term="Uplink and Downlink" data-glossary-definition="Communication directions between the network and user equipment. Uplink is data sent from the UE to the network; downlink is data travelling from the network to UEs." tabindex="0" role="button">downlink</span> AWGN) are currently only viable on
+- `*_heavy` RF profiles (CFO + downlink AWGN) are currently only viable on
   very small pools (2-3 UEs) before the per-sample cost craters lockstep
   throughput — worth revisiting if/when the underlying channel math gets
   optimized.

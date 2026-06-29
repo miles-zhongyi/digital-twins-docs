@@ -20,7 +20,7 @@ The default deployment is **one pair** (`srsue4g`/`srsenb`/`srsepc`). A
 `docker-compose.3ue.yml` overlay adds two more independent pairs
 (`srsenb2`/`srsue4g2`, `srsenb3`/`srsue4g3`), all sharing the **same** <span class="glossary-term" data-glossary-id="epc" data-glossary-term="EPC" data-glossary-definition="Evolved Packet Core — the 4G core network (MME, SGW, PGW, HSS) handling mobility, authentication, and sessions." tabindex="0" role="button">EPC</span> —
 see [`design_principles.md`](design_principles.md) for why pairs share one
-EPC and never share a radio link. There is no cross-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span> sharing in this
+EPC and never share a radio link. There is no cross-UE <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span> sharing in this
 twin (see "Why not just add more UEs" below); three pairs means three
 independent ZMQ lockstep links, each as fast as a single UE alone.
 
@@ -32,17 +32,17 @@ The twin's distinguishing feature is that a live simulated <span class="glossary
 record (`22_decoded/`), and
 `rrc_trace/rrc_injector_entrypoint.sh` exports them as environment variables
 (`RRC_TRACE_LTE_M_TMSI`, `RRC_TRACE_LTE_CAUSE`) before `srsue` starts.
-`srsue/src/stack/rrc/rrc.cc`'s <span class="glossary-term" data-glossary-id="rrc" data-glossary-term="RRC" data-glossary-definition="Radio Resource Control — Layer 3 protocol between UE and base station for connection setup, mobility, and bearer configuration." tabindex="0" role="button">RRC</span> Connection Request builder reads them via
+`srsue/src/stack/rrc/rrc.cc`'s RRC Connection Request builder reads them via
 plain `std::getenv()` and uses them instead of its own synthetic defaults.
 The result: the live attach's first RRC message carries a real subscriber's
 identity fields, so the signaling that follows is directly comparable to
 what that real subscriber's phone produced.
 
 A second, **offline-only** path does the reverse direction — re-encoding a
-real captured record into <span class="glossary-term" data-glossary-id="per-encoding" data-glossary-term="PER encoding" data-glossary-definition="Packed Encoding Rules — compact binary encoding of ASN.1 structures for RRC/NAS Layer-3 messages. Decoupling from PHY does not mean skipping PER encoding." tabindex="0" role="button">PER</span>/UPER bytes for side-by-side display
+real captured record into PER/UPER bytes for side-by-side display
 (`rrc_trace/encode_templates.py`, <span class="glossary-term" data-glossary-id="pycrate" data-glossary-term="Pycrate" data-glossary-definition="Python ASN.1 toolkit used to load UL-DCCH-Message definitions and validate that reconstructed messages match the expected ASN.1 structure and fields." tabindex="0" role="button">pycrate</span>-based). This is dashboard
 decoration only: it has never been wired to feed live bytes into `srsue`.
-The forward path for that (a byte-level injector that would let a live <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span>
+The forward path for that (a byte-level injector that would let a live UE
 *transmit* arbitrary real-trace-derived PER encodings rather than just
 borrowing two fields) is exactly what the paused `realizer/` plan's M5
 milestone is for — see [`usage_and_roadmap.md`](usage_and_roadmap.md).
@@ -50,7 +50,7 @@ milestone is for — see [`usage_and_roadmap.md`](usage_and_roadmap.md).
 ## Why not just add more UEs onto one <span class="glossary-term" data-glossary-id="enb" data-glossary-term="eNB" data-glossary-definition="Evolved Node B — the 4G LTE base station connecting UEs to the EPC over S1AP." tabindex="0" role="button">eNB</span>
 
 `srsue`/`srsenb` exchange IQ over ZeroMQ in **lockstep**: one request/reply
-round trip per radio subframe, shared by every <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> on the <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>. This isn't a
+round trip per radio subframe, shared by every UE on the <span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span>. This isn't a
 CPU limit — it's a serialization point. Adding UEs to one shared link adds
 more round trips per subframe, so the cell's effective clock slows down
 roughly linearly with UE count. This was measured directly (see below) and
@@ -60,29 +60,29 @@ clock crawls," per `storm/README.md`).
 
 The 4G twin's answer, for now, is the opposite of approximating the
 limit: **don't share a link**. Each of the 3 pairs gets its own independent
-<span class="glossary-term" data-glossary-id="enb" data-glossary-term="eNB" data-glossary-definition="Evolved Node B — the 4G LTE base station connecting UEs to the EPC over S1AP." tabindex="0" role="button">eNB</span> + <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> + ZMQ link, so 3 pairs running concurrently are still each
+eNB + UE + ZMQ link, so 3 pairs running concurrently are still each
 individually as fast as 1 pair alone — what changes is that they now
 compete for the *same host's* CPU, which is a different, also-real and
 also-worth-measuring kind of contention. The paused `realizer/` plan
 (see `usage_and_roadmap.md`) is the alternative being designed for: one
-`srsue` process hosting N logical UE contexts over one shared <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span> worker,
+`srsue` process hosting N logical <span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> contexts over one shared PHY worker,
 which would remove the per-pair container/process overhead entirely — but
 that is **not** what's running today.
 
-## Measuring real contention: the 3-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> demo
+## Measuring real contention: the 3-UE demo
 
-`integration/demo3ue/` force-recreates each pair's <span class="glossary-term" data-glossary-id="enb" data-glossary-term="eNB" data-glossary-definition="Evolved Node B — the 4G LTE base station connecting UEs to the EPC over S1AP." tabindex="0" role="button">eNB</span>+<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> together (recreating
-a UE alone against an already-running eNB causes a <span class="glossary-term" data-glossary-id="rach" data-glossary-term="RACH" data-glossary-definition="Random Access Channel — procedure for a UE to request initial access to a cell (preamble, response, connection setup)." tabindex="0" role="button">RACH</span> retry storm that
+`integration/demo3ue/` force-recreates each pair's eNB+UE together (recreating
+a UE alone against an already-running <span class="glossary-term" data-glossary-id="enb" data-glossary-term="eNB" data-glossary-definition="Evolved Node B — the 4G LTE base station connecting UEs to the EPC over S1AP." tabindex="0" role="button">eNB</span> causes a <span class="glossary-term" data-glossary-id="rach" data-glossary-term="RACH" data-glossary-definition="Random Access Channel — procedure for a UE to request initial access to a cell (preamble, response, connection setup)." tabindex="0" role="button">RACH</span> retry storm that
 never settles — confirmed empirically) and runs repeated attach/release
 cycles, comparing one pair running alone against all three running
 concurrently. Two KPIs are tracked:
 
 - **<span class="glossary-term" data-glossary-id="du" data-glossary-term="DU" data-glossary-definition="Distributed Unit — runs lower real-time layers (RLC, MAC, high-PHY scheduling) in an O-RAN split. A software DU runs on general-purpose servers; non-real-time simulation DUs can be time-dilated, real-time DUs driving real fronthaul cannot." tabindex="0" role="button">DU</span> processing delay** — PRACH preamble (Msg1) to Random Access Response
-  (Msg2) turnaround. This is <span class="glossary-term" data-glossary-id="enb" data-glossary-term="eNB" data-glossary-definition="Evolved Node B — the 4G LTE base station connecting UEs to the EPC over S1AP." tabindex="0" role="button">eNB</span>-side only, no <span class="glossary-term" data-glossary-id="epc" data-glossary-term="EPC" data-glossary-definition="Evolved Packet Core — the 4G core network (MME, SGW, PGW, HSS) handling mobility, authentication, and sessions." tabindex="0" role="button">EPC</span> round trip — the standard
-  <span class="glossary-term" data-glossary-id="rach" data-glossary-term="RACH" data-glossary-definition="Random Access Channel — procedure for a UE to request initial access to a cell (preamble, response, connection setup)." tabindex="0" role="button">RACH</span> response-time KPI (4G's eNB plays the DU's <span class="glossary-term" data-glossary-id="phy" data-glossary-term="PHY" data-glossary-definition="Physical layer — OFDM, modulation, and channel coding into IQ samples. A real DU must eventually demodulate IQ samples; PHY cannot be skipped entirely." tabindex="0" role="button">PHY</span>/MAC role; there's no
+  (Msg2) turnaround. This is eNB-side only, no EPC round trip — the standard
+  RACH response-time KPI (4G's eNB plays the DU's PHY/MAC role; there's no
   separate DU process to isolate).
-- **Call/session duration** — <span class="glossary-term" data-glossary-id="nas" data-glossary-term="NAS" data-glossary-definition="Non-Access Stratum — Layer 3 protocol between UE and core for attach, authentication, and session management." tabindex="0" role="button">NAS</span> Attach Complete to eNB-initiated release
-  (the <span class="glossary-term" data-glossary-id="enb" data-glossary-term="eNB" data-glossary-definition="Evolved Node B — the 4G LTE base station connecting UEs to the EPC over S1AP." tabindex="0" role="button">eNB</span>'s inactivity timer, default 30s).
+- **Call/session duration** — NAS Attach Complete to eNB-initiated release
+  (the eNB's inactivity timer, default 30s).
 
 Measured result (`demo3ue/RESULTS.md`, n=5 cycles per scenario, same
 hardware, only concurrency changed):
@@ -101,13 +101,13 @@ paused `realizer/` plan exists to make unnecessary at larger N.
 
 `integration/dashboard/serve_dashboard.py` (port 8765) parses live container
 logs into a call-flow ladder, per-message explanations, KPIs, and a live
-multi-<span class="glossary-term" data-glossary-id="ue" data-glossary-term="UE" data-glossary-definition="User Equipment — the mobile device (phone/modem) that attaches to the cellular network." tabindex="0" role="button">UE</span> KPI histogram. A few points worth knowing if you're extending it:
+multi-UE KPI histogram. A few points worth knowing if you're extending it:
 
 - **`parse_4g.py`** turns raw `srsenb`/`srsue` log lines into ordered events.
   Two non-obvious pieces: an `_ATTACH_FLOW` phase-rank table sorts events by
-  *protocol logic* (<span class="glossary-term" data-glossary-id="cell" data-glossary-term="Cell" data-glossary-definition="One carrier on one sector of a base station — a single radio coverage unit defined by frequency and physical cell ID. Multi-UE on one cell means many UEs contending on that single virtual cell." tabindex="0" role="button">cell</span> acquisition → random access → setup → <span class="glossary-term" data-glossary-id="nas" data-glossary-term="NAS" data-glossary-definition="Non-Access Stratum — Layer 3 protocol between UE and core for attach, authentication, and session management." tabindex="0" role="button">NAS</span> auth →
+  *protocol logic* (cell acquisition → random access → setup → NAS auth →
   bearer setup → attach complete → release) rather than raw timestamp,
-  because NAS Attach Request is logged by `srsue` at decision-time, before
+  because <span class="glossary-term" data-glossary-id="nas" data-glossary-term="NAS" data-glossary-definition="Non-Access Stratum — Layer 3 protocol between UE and core for attach, authentication, and session management." tabindex="0" role="button">NAS</span> Attach Request is logged by `srsue` at decision-time, before
   it's actually sent inside a later <span class="glossary-term" data-glossary-id="rrc" data-glossary-term="RRC" data-glossary-definition="Radio Resource Control — Layer 3 protocol between UE and base station for connection setup, mobility, and bearer configuration." tabindex="0" role="button">RRC</span> message — `_CARRIED_IN` substitutes
   the carrier message's timestamp so the ladder doesn't show it arriving
   "before" its own logical predecessor. `compute_attach_kpis()` separates

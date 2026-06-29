@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Annotate markdown with glossary spans using per-passage occurrence throttling."""
+"""Annotate markdown with glossary spans using per-page occurrence throttling."""
 
 from __future__ import annotations
 
@@ -74,7 +74,7 @@ def strip_existing_spans(text: str) -> str:
 
 
 def should_define(term_id: str, term_state: dict[str, dict]) -> bool:
-    """Define on 1st hit, skip 2, define, skip 4, define, skip 8, ..."""
+    """Per page: define, skip 2, define, skip 4, define, skip 8, ..."""
     state = term_state.setdefault(term_id, {"skip_remaining": 0, "next_skip": 2})
     if state["skip_remaining"] > 0:
         state["skip_remaining"] -= 1
@@ -155,27 +155,16 @@ def annotate_line(line: str, patterns: list[dict], term_state: dict[str, dict]) 
     return "".join(pieces)
 
 
-def annotate_passage_lines(lines: list[str], patterns: list[dict]) -> list[str]:
-    term_state: dict[str, dict] = {}
-    return [annotate_line(line, patterns, term_state) for line in lines]
-
-
 def annotate_markdown(text: str, patterns: list[dict]) -> str:
+    """One throttle counter per page (whole markdown file)."""
     lines = text.splitlines(keepends=True)
     output: list[str] = []
     in_fence = False
-    passage_lines: list[str] = []
-
-    def flush_passage() -> None:
-        nonlocal passage_lines
-        if passage_lines:
-            output.extend(annotate_passage_lines(passage_lines, patterns))
-            passage_lines = []
+    term_state: dict[str, dict] = {}
 
     for line in lines:
         fence_match = FENCE_RE.match(line)
         if fence_match:
-            flush_passage()
             in_fence = not in_fence
             output.append(line)
             continue
@@ -184,14 +173,8 @@ def annotate_markdown(text: str, patterns: list[dict]) -> str:
             output.append(strip_existing_spans(line))
             continue
 
-        if line.strip() == "":
-            flush_passage()
-            output.append(line)
-            continue
+        output.append(annotate_line(line, patterns, term_state))
 
-        passage_lines.append(line)
-
-    flush_passage()
     return "".join(output)
 
 
@@ -204,6 +187,7 @@ def main() -> int:
         path
         for path in root.rglob("*.md")
         if path.name != "glossary.md" and "_build" not in path.parts
+        and path.name != "confidentiality.md"
     )
 
     for md_path in md_files:
