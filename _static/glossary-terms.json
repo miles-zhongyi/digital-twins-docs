@@ -316,5 +316,83 @@
     "term": "RACH",
     "aliases": ["rach", "Random Access Channel"],
     "definition": "Random Access Channel — procedure for a UE to request initial access to a cell (preamble, response, connection setup)."
+  },
+  {
+    "id": "ngap",
+    "term": "NGAP",
+    "aliases": ["ngap"],
+    "definition": "NG Application Protocol — control-plane protocol between gNB and 5G core AMF."
+  },
+  {
+    "id": "5gmm",
+    "term": "5GMM",
+    "aliases": ["5gmm", "5G Mobility Management"],
+    "definition": "5G Mobility Management — UE state machine for registration, deregistration, and mobility in 5G SA."
+  },
+  {
+    "id": "5gsm",
+    "term": "5GSM",
+    "aliases": ["5gsm", "5G Session Management"],
+    "definition": "5G Session Management — UE state machine for PDU session establishment, modification, and release."
+  },
+  {
+    "id": "sctp",
+    "term": "SCTP",
+    "aliases": ["sctp"],
+    "definition": "Stream Control Transmission Protocol — reliable transport used by S1AP, NGAP, and other telecom control protocols."
+  },
+  {
+    "id": "fapi",
+    "term": "FAPI",
+    "aliases": ["fapi", "nFAPI"],
+    "definition": "Femtocell API — software interface between MAC and PHY (or O-DU and PHY) that can bypass full eCPRI fronthaul for lab integration."
+  },
+  {
+    "id": "m-plane",
+    "term": "M-plane",
+    "aliases": ["m-plane", "M plane", "management plane"],
+    "definition": "Management plane — NETCONF/YANG configuration and capability exchange between O-DU and RU during initialization."
+  },
+  {
+    "id": "s-plane",
+    "term": "S-plane",
+    "aliases": ["s-plane", "S plane", "synchronization plane"],
+    "definition": "Synchronization plane — PTP/IEEE-1588 timing lock between O-DU and RU; prerequisite before C-plane and U-plane traffic."
+  },
+  {
+    "id": "open-fronthaul",
+    "term": "Open Fronthaul",
+    "aliases": ["open fronthaul", "O-RAN fronthaul"],
+    "definition": "O-RAN WG4 fronthaul specification (eCPRI-based) between DU and RU for C-plane and U-plane sections."
+  },
+  {
+    "id": "amf",
+    "term": "AMF",
+    "aliases": ["amf"],
+    "definition": "Access and Mobility Management Function — 5G core node handling registration and mobility over NGAP."
+  },
+  {
+    "id": "pdu-session",
+    "term": "PDU Session",
+    "aliases": ["pdu session", "PDU session"],
+    "definition": "5G user data session between UE and data network, established via 5GSM procedures."
+  },
+  {
+    "id": "netconf",
+    "term": "NETCONF",
+    "aliases": ["netconf"],
+    "definition": "Network Configuration Protocol — management interface (often with YANG models) for RU/O-DU initialization."
+  },
+  {
+    "id": "ptp",
+    "term": "PTP",
+    "aliases": ["ptp", "IEEE 1588"],
+    "definition": "Precision Time Protocol — sub-microsecond synchronization required for O-RAN S-plane between DU and RU."
+  },
+  {
+    "id": "harq",
+    "term": "HARQ",
+    "aliases": ["harq"],
+    "definition": "Hybrid Automatic Repeat Request — L1/L2 retransmission mechanism whose timing RRC procedures depend on."
   }
 ]

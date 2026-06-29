@@ -12,6 +12,7 @@ chapters:
       - file: srstwin/structure_and_implementation
       - file: srstwin/lte_digital_twin
       - file: srstwin/sa_signaling_storm
+      - file: srstwin/ru_digital_twin_reference
       - file: srstwin/design_principles
       - file: srstwin/usage_and_roadmap
   - file: comparison

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Annotate markdown files with explicit glossary term spans."""
+"""Annotate markdown with glossary spans using per-passage occurrence throttling."""
 
 from __future__ import annotations
 
@@ -34,7 +34,6 @@ def load_patterns(terms_path: Path) -> list[dict]:
             if not alias:
                 continue
             if len(alias) <= 3 and alias.islower():
-                # Skip ambiguous short lowercase aliases like "ue", "du", "cu".
                 continue
             patterns.append(
                 {
@@ -74,48 +73,65 @@ def strip_existing_spans(text: str) -> str:
     return GLOSSARY_SPAN_RE.sub(lambda match: match.group("text"), text)
 
 
-def annotate_segment_once(segment: str, patterns: list[dict]) -> str:
-    matches: list[dict] = []
-    for pattern in patterns:
-        for match in pattern["regex"].finditer(segment):
-            matches.append(
-                {
-                    "start": match.start(),
-                    "end": match.end(),
-                    "text": match.group(0),
-                    "pattern": pattern,
-                }
-            )
+def should_define(term_id: str, term_state: dict[str, dict]) -> bool:
+    """Define on 1st hit, skip 2, define, skip 4, define, skip 8, ..."""
+    state = term_state.setdefault(term_id, {"skip_remaining": 0, "next_skip": 2})
+    if state["skip_remaining"] > 0:
+        state["skip_remaining"] -= 1
+        return False
+    state["skip_remaining"] = state["next_skip"]
+    state["next_skip"] *= 2
+    return True
 
-    if not matches:
+
+def find_earliest_match(segment: str, cursor: int, patterns: list[dict]) -> dict | None:
+    best = None
+    for pattern in patterns:
+        match = pattern["regex"].search(segment, cursor)
+        if not match:
+            continue
+        candidate = {
+            "start": match.start(),
+            "end": match.end(),
+            "text": match.group(0),
+            "pattern": pattern,
+        }
+        if best is None or candidate["start"] < best["start"]:
+            best = candidate
+        elif candidate["start"] == best["start"] and (candidate["end"] - candidate["start"]) > (
+            best["end"] - best["start"]
+        ):
+            best = candidate
+    return best
+
+
+def annotate_segment_with_state(
+    segment: str, patterns: list[dict], term_state: dict[str, dict]
+) -> str:
+    if not segment:
         return segment
 
-    matches.sort(key=lambda item: (item["start"], -(item["end"] - item["start"])))
-    selected: list[dict] = []
-    for candidate in matches:
-        if any(
-            not (
-                candidate["end"] <= existing["start"]
-                or candidate["start"] >= existing["end"]
-            )
-            for existing in selected
-        ):
-            continue
-        selected.append(candidate)
+    parts: list[str] = []
+    cursor = 0
 
-    selected.sort(key=lambda item: item["start"], reverse=True)
-    annotated = segment
-    for match in selected:
-        annotated = (
-            annotated[: match["start"]]
-            + make_span(match["text"], match["pattern"])
-            + annotated[match["end"] :]
-        )
-    return annotated
+    while cursor < len(segment):
+        match = find_earliest_match(segment, cursor, patterns)
+        if not match:
+            parts.append(segment[cursor:])
+            break
+
+        parts.append(segment[cursor : match["start"]])
+        term_id = match["pattern"]["id"]
+        if should_define(term_id, term_state):
+            parts.append(make_span(match["text"], match["pattern"]))
+        else:
+            parts.append(match["text"])
+        cursor = match["end"]
+
+    return "".join(parts)
 
 
 def split_inline_markdown(line: str) -> list[tuple[str, bool]]:
-    """Split a line into plain-text and protected regions."""
     parts: list[tuple[str, bool]] = []
     cursor = 0
     for match in re.finditer(r"(`+[^`]+`+|\[[^\]]+\]\([^\)]+\)|<[^>]+>)", line):
@@ -128,30 +144,54 @@ def split_inline_markdown(line: str) -> list[tuple[str, bool]]:
     return parts
 
 
-def annotate_line(line: str, patterns: list[dict]) -> str:
+def annotate_line(line: str, patterns: list[dict], term_state: dict[str, dict]) -> str:
     line = strip_existing_spans(line)
     pieces: list[str] = []
     for segment, protected in split_inline_markdown(line):
-        pieces.append(segment if protected else annotate_segment_once(segment, patterns))
+        if protected:
+            pieces.append(segment)
+        else:
+            pieces.append(annotate_segment_with_state(segment, patterns, term_state))
     return "".join(pieces)
+
+
+def annotate_passage_lines(lines: list[str], patterns: list[dict]) -> list[str]:
+    term_state: dict[str, dict] = {}
+    return [annotate_line(line, patterns, term_state) for line in lines]
 
 
 def annotate_markdown(text: str, patterns: list[dict]) -> str:
     lines = text.splitlines(keepends=True)
     output: list[str] = []
     in_fence = False
+    passage_lines: list[str] = []
+
+    def flush_passage() -> None:
+        nonlocal passage_lines
+        if passage_lines:
+            output.extend(annotate_passage_lines(passage_lines, patterns))
+            passage_lines = []
 
     for line in lines:
         fence_match = FENCE_RE.match(line)
         if fence_match:
+            flush_passage()
             in_fence = not in_fence
             output.append(line)
             continue
+
         if in_fence:
             output.append(strip_existing_spans(line))
             continue
-        output.append(annotate_line(line, patterns))
 
+        if line.strip() == "":
+            flush_passage()
+            output.append(line)
+            continue
+
+        passage_lines.append(line)
+
+    flush_passage()
     return "".join(output)
 
 
@@ -168,7 +208,8 @@ def main() -> int:
 
     for md_path in md_files:
         original = md_path.read_text(encoding="utf-8")
-        updated = annotate_markdown(original, patterns)
+        cleaned = strip_existing_spans(original)
+        updated = annotate_markdown(cleaned, patterns)
         if updated != original:
             md_path.write_text(updated, encoding="utf-8")
             print(f"annotated: {md_path.relative_to(root)}")

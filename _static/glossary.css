@@ -1,19 +1,59 @@
-/* Glossary term highlights in book content */
-.glossary-term {
+/* Light theme — dark blue on light background */
+html[data-theme="light"] .glossary-term {
   color: #0b5cab;
   background: rgba(11, 92, 171, 0.08);
   border-bottom: 1px dotted #0b5cab;
+}
+
+html[data-theme="light"] .glossary-term:hover,
+html[data-theme="light"] .glossary-term:focus,
+html[data-theme="light"] .glossary-term.glossary-term-active {
+  color: #083d73;
+  background: rgba(11, 92, 171, 0.14);
+}
+
+html[data-theme="light"] .glossary-tooltip {
+  background: #ffffff;
+  color: #1a1a1a;
+  border-color: #0b5cab;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+
+html[data-theme="light"] .glossary-tooltip-title {
+  color: #0b5cab;
+}
+
+/* Dark theme — light blue on dark background */
+html[data-theme="dark"] .glossary-term {
+  color: #7ec8ff;
+  background: rgba(126, 200, 255, 0.12);
+  border-bottom: 1px dotted #7ec8ff;
+}
+
+html[data-theme="dark"] .glossary-term:hover,
+html[data-theme="dark"] .glossary-term:focus,
+html[data-theme="dark"] .glossary-term.glossary-term-active {
+  color: #a8daff;
+  background: rgba(126, 200, 255, 0.2);
+}
+
+html[data-theme="dark"] .glossary-tooltip {
+  background: #2b2b2b;
+  color: #e8e8e8;
+  border-color: #5a9fd4;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="dark"] .glossary-tooltip-title {
+  color: #7ec8ff;
+}
+
+/* Shared */
+.glossary-term {
   border-radius: 2px;
   cursor: help;
   padding: 0 1px;
   text-decoration: none;
-}
-
-.glossary-term:hover,
-.glossary-term:focus,
-.glossary-term.glossary-term-active {
-  color: #083d73;
-  background: rgba(11, 92, 171, 0.16);
   outline: none;
 }
 
@@ -22,11 +62,7 @@
   z-index: 10000;
   max-width: min(360px, calc(100vw - 24px));
   padding: 0.65rem 0.8rem;
-  background: #ffffff;
-  color: #222222;
-  border: 1px solid #0b5cab;
   border-radius: 6px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
   font-size: 0.9rem;
   line-height: 1.45;
   pointer-events: none;
@@ -35,7 +71,6 @@
 .glossary-tooltip-title {
   display: block;
   font-weight: 700;
-  color: #0b5cab;
   margin-bottom: 0.35rem;
 }
 
@@ -43,7 +78,6 @@
   display: block;
 }
 
-/* Do not double-style terms inside the glossary index page headings */
 .glossary-index .glossary-term {
   background: transparent;
   border-bottom: none;
@@ -54,4 +88,17 @@
 .glossary-index .glossary-term:hover {
   background: transparent;
   color: inherit;
+}
+
+/* Fallback when theme attribute is not yet set */
+.glossary-term {
+  color: #0b5cab;
+  background: rgba(11, 92, 171, 0.08);
+  border-bottom: 1px dotted #0b5cab;
+}
+
+.glossary-tooltip {
+  background: #ffffff;
+  color: #1a1a1a;
+  border: 1px solid #0b5cab;
 }
