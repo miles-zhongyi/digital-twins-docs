@@ -1,0 +1,31 @@
+/* Narrow sidebars and give more room to the main article column. */
+
+html {
+  --pst-sidebar-secondary: 12rem;
+}
+
+@media (min-width: 992px) {
+  .bd-sidebar-primary {
+    flex: 0 0 14rem;
+    width: 14rem;
+    max-width: 14rem;
+    padding: 1.25rem 0.5rem 1rem 0.75rem;
+  }
+
+  .bd-sidebar-secondary {
+    padding: 1.25rem 0.75rem 1rem 0.5rem;
+  }
+
+  .bd-sidebar-primary .logo__image {
+    max-width: 4.5rem;
+  }
+}
+
+/* Separate rules so specificity overrides theme defaults correctly. */
+.bd-main .bd-content .bd-article-container {
+  max-width: 75em;
+}
+
+.bd-page-width {
+  max-width: 96rem;
+}
