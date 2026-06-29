@@ -45,7 +45,7 @@ jobs:
           npx --yes staticrypt html -r -d encrypted --short --remember 7
           -c ../.staticrypt.json
           -t ../password_template.html
-          --template-color-secondary "#000000"
+          --template-color-secondary "#ffffff"
 
       - uses: actions/upload-pages-artifact@v3
         with:
