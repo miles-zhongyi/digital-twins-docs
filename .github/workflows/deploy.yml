@@ -34,11 +34,18 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Copy logo for password page
+        run: cp dodonaLogo.png _build/html/dodonaLogo.png
+
       - name: Password-protect the built site
         working-directory: _build
         env:
           STATICRYPT_PASSWORD: ${{ secrets.STATICRYPT_PASSWORD }}
-        run: npx --yes staticrypt html -r -d encrypted --short --remember 7 -c ../.staticrypt.json
+        run: >-
+          npx --yes staticrypt html -r -d encrypted --short --remember 7
+          -c ../.staticrypt.json
+          -t ../password_template.html
+          --template-color-secondary "#000000"
 
       - uses: actions/upload-pages-artifact@v3
         with:
